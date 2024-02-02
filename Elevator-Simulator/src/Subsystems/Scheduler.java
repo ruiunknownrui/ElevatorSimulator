@@ -28,8 +28,8 @@ public class Scheduler {
         notifyAll();
     }
 
-    public synchronized void handleEvents(){
-        //TODO: Give work to elevator, get data back and pass to floor.
+    public synchronized Event getNextEvent(){
+        return this.events.removeFirst();
     }
 }
 

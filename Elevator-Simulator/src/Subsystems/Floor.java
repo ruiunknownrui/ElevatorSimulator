@@ -15,13 +15,13 @@ public class Floor implements Runnable{
     public Floor(Scheduler s){this.scheduler = s;}
 
     private ArrayList<Event> readInput() {
-        File events = new File("../src/input.txt");
+        File events = new File("src/input.txt");
         ArrayList<Event> eventsData = new ArrayList<>();
 
         try {
             Scanner s = new Scanner(events);
-            while (s.hasNext()) {
-                String event = s.next();
+            while (s.hasNextLine()) {
+                String event = s.nextLine();
                 System.out.println("Read the following event from the file: " + event);
 
                 String[] eventData = event.split(" ");
