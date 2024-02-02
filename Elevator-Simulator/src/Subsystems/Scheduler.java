@@ -9,7 +9,7 @@ public class Scheduler {
 
     private SchedulerState state;
     private boolean readable = false;
-    private ArrayList<Event> events;
+    private ArrayList<Event> events = new ArrayList<>();
 
     public Scheduler(){ this.state = SchedulerState.Active; }
     public SchedulerState getState(){ return this.state; }
@@ -25,10 +25,14 @@ public class Scheduler {
         System.out.println("Scheduler received request from Floor " + e.getFloor() + " to go " + e.getFloorButton() +
                 " to floor " + e.getCarButton() + ".");
         this.events.add(e);
+        this.state = SchedulerState.Active;
         notifyAll();
     }
 
     public synchronized Event getNextEvent(){
+        if(this.events.isEmpty()){
+            this.state = SchedulerState.Inactive;
+        }
         return this.events.removeFirst();
     }
 }

@@ -26,6 +26,8 @@ public class Elevator implements Runnable{
 
     public void run(){
         while (scheduler.getState() == SchedulerState.Active){
+            //TODO: Process event and make scheduler inactive.
+
             Event data = scheduler.getNextEvent();
 
         }
