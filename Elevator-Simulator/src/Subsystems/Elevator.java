@@ -4,7 +4,8 @@ import States.SchedulerState;
 
 public class Elevator implements Runnable{
 
-    Scheduler scheduler;
+    private Scheduler scheduler;
+    private int currentFloor = 1;
 
     public Elevator(Scheduler s){ this.scheduler = s;}
 

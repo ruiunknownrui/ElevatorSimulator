@@ -44,11 +44,15 @@ public class Floor implements Runnable{
         return eventsData;
     }
     public void run(){
-
         ArrayList<Event> eventsInput = readInput();
 
         while(scheduler.getState() == SchedulerState.Active){
-
+            for(int i = 0; i < eventsInput.size(); i++){
+                this.scheduler.addToEvents(eventsInput.get(i));
+            }
+            try{
+                Thread.sleep(500);
+            } catch (InterruptedException e) { return; }
         }
     }
 }
