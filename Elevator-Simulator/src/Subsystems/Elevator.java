@@ -6,9 +6,12 @@ import States.SchedulerState;
 public class Elevator implements Runnable{
 
     private Scheduler scheduler;
-    private int currentFloor = 1;
+    private int currentFloor;
 
-    public Elevator(Scheduler s){ this.scheduler = s;}
+    public Elevator(Scheduler s){
+        this.scheduler = s;
+        this.currentFloor = 1;
+    }
 
     public void moveUp(){
         if(currentFloor < 8){
@@ -25,11 +28,17 @@ public class Elevator implements Runnable{
     }
 
     public void run(){
-        while (scheduler.getState() == SchedulerState.Active){
+        while (scheduler.hasWork()){
             //TODO: Process event and make scheduler inactive.
-
+            System.out.println("DEBUG");
             Event data = scheduler.getNextEvent();
-
+            if(data != null){
+                System.out.println("Elevator received data from Scheduler.");
+            }
+            try {
+                Thread.sleep(500);
+            }
+            catch (InterruptedException e) { return; }
         }
     }
 }
