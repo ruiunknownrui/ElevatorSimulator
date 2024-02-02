@@ -29,7 +29,7 @@ public class Scheduler {
     }
 
     public synchronized void handleEvents(){
-
+        //TODO: Give work to elevator, get data back and pass to floor.
     }
 }
 

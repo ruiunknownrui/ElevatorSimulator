@@ -25,7 +25,7 @@ public class Elevator implements Runnable{
 
     public void run(){
         while (scheduler.getState() == SchedulerState.Active){
-
+            //TODO: Make calls to scheduler to get work.
         }
     }
 }
