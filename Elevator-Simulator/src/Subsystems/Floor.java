@@ -15,7 +15,7 @@ public class Floor implements Runnable{
     public Floor(Scheduler s){this.scheduler = s;}
 
     private ArrayList<Event> readInput() {
-        File events = new File("src/input.txt");
+        File events = new File("Elevator-Simulator/src/input.txt");
         ArrayList<Event> eventsData = new ArrayList<>();
 
         try {
@@ -48,8 +48,9 @@ public class Floor implements Runnable{
         for (Event event : eventsInput) {
             this.scheduler.addToEvents(event);
             try{
-                Thread.sleep(500);
+                Thread.sleep(200);
             } catch (InterruptedException e) { return; }
         }
+        Scheduler.floorDone();
     }
 }
