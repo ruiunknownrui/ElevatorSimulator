@@ -27,5 +27,9 @@ public class Scheduler {
         this.events.add(e);
         notifyAll();
     }
+
+    public synchronized void handleEvents(){
+
+    }
 }
 
