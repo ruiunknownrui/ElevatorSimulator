@@ -1,7 +1,6 @@
 package Subsystems;
 
 import Data.Event;
-import States.SchedulerState;
 
 import java.util.ArrayList;
 
@@ -9,26 +8,38 @@ public class Scheduler {
 
     private boolean readable;
     private ArrayList<Event> events;
-    private boolean hasWork;
+    private static boolean floorDone;
+    private boolean schedulerDone = false;
 
     public Scheduler(){
         this.readable = false;
         this.events = new ArrayList<>();
-        this.hasWork = false;
+        floorDone = false;
     }
 
-    public boolean hasWork(){ return this.hasWork; }
+    public static void floorDone() {
+        floorDone = true;
+    }
+
+    public boolean notFinish(){
+        if(this.events.isEmpty() && floorDone) {
+            schedulerDone = true;
+        }
+        return (!floorDone || !schedulerDone);
+    }
 
     public synchronized void addToEvents(Event e){
         System.out.println("Scheduler received request from floor " + e.getFloor() + " to go " + e.getFloorButton() +
                 " to floor " + e.getCarButton() + ".");
         this.events.add(e);
-        this.hasWork = true;
         notifyAll();
+        try{
+            Thread.sleep(400);
+        } catch (InterruptedException ignored) {}
     }
 
     public synchronized Event getNextEvent(){
-        while(!this.hasWork()){
+        while(events.isEmpty() && !schedulerDone){
             try{
                 wait();
             } catch (InterruptedException e){
@@ -37,12 +48,7 @@ public class Scheduler {
         }
 
         Event eV = this.events.removeFirst();
-        if(this.events.isEmpty()){
-            this.hasWork = false;
-        }
-
         notifyAll();
-
         return eV;
     }
 }
