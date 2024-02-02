@@ -28,17 +28,13 @@ public class Elevator implements Runnable{
     }
 
     public void run(){
-        while (scheduler.hasWork()){
-            //TODO: Process event and make scheduler inactive.
-            System.out.println("DEBUG");
-            Event data = scheduler.getNextEvent();
-            if(data != null){
-                System.out.println("Elevator received data from Scheduler.");
-            }
+        Event data = scheduler.getNextEvent();
+        while(data != null) {
+            System.out.println("Elevator received data from Scheduler.");
             try {
                 Thread.sleep(500);
-            }
-            catch (InterruptedException e) { return; }
+            } catch (InterruptedException e) { return; }
+            data = scheduler.getNextEvent();
         }
     }
 }

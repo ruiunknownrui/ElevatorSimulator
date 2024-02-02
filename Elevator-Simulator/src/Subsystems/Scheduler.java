@@ -20,6 +20,13 @@ public class Scheduler {
     public boolean hasWork(){ return this.hasWork; }
 
     public synchronized void addToEvents(Event e){
+        while(this.hasWork()){
+            try{
+                wait();
+            } catch (InterruptedException ie){
+                System.err.println(ie);
+            }
+        }
         System.out.println("Scheduler received request from floor " + e.getFloor() + " to go " + e.getFloorButton() +
                 " to floor " + e.getCarButton() + ".");
         this.events.add(e);
@@ -42,7 +49,6 @@ public class Scheduler {
         }
 
         notifyAll();
-
         return eV;
     }
 }
