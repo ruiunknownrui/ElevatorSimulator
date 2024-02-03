@@ -1,0 +1,64 @@
+@startuml
+enum Direction {
+    +UP
+    +DOWN
+}
+
+enum SchedulerState {
+    +ACTIVE
+    +INACTIVE
+}
+
+class Event {
+    -time: int
+    -floor: int
+    -floorButton: Direction
+    -carButton: int
+    +getTime(): int
+    +getFloor(): int
+    +getFloorButton(): Direction
+    +getCarButton(): int
+}
+
+class Floor {
+    -scheduler: Scheduler
+    -requestBuffer: RequestBuffer
+    +run(): void
+    +readInput(): void
+}
+
+class Elevator {
+    -currentFloor: int
+    -scheduler: Scheduler
+    +run(): void
+    +moveUp(): void
+    +moveDown(): void
+}
+
+class Scheduler {
+    -state: SchedulerState
+    -events: List<Event>
+    -requestBuffer: RequestBuffer
+    +run(): void
+    +schedule(): void
+    +addEvent(event: Event): void
+}
+
+class RequestBuffer {
+    -events: List<Event>
+    +addToEvents(event: Event): void
+    +getNextEvent(): Event
+    +floorDone(): boolean
+    +getFloorDone(): boolean
+    +notFinish(): boolean
+}
+
+
+
+Floor -right-> Scheduler : uses
+Floor -down-> RequestBuffer : uses
+Elevator -left-> Scheduler : uses
+Scheduler -down-> RequestBuffer : uses
+Scheduler "1" *-- "*" Event : contains
+RequestBuffer "1" *-- "*" Event : contains
+@enduml
