@@ -7,6 +7,11 @@ import java.util.ArrayList;
 public class RequestBuffer {
 
     private boolean readable;
+
+    public ArrayList<Event> getEvents() {
+        return events;
+    }
+
     private ArrayList<Event> events;
     private static boolean floorDone;
     private boolean schedulerDone = false;
