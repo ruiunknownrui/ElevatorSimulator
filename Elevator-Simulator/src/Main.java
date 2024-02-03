@@ -1,17 +1,21 @@
 import Subsystems.Elevator;
 import Subsystems.Floor;
 import Subsystems.RequestBuffer;
+import Subsystems.Scheduler;
 
 public class Main {
     public static void main(String[] args) {
-        Thread floor, elevator;
+        Thread floor, elevator, schedulerThread;
 
-        RequestBuffer requestBufferSubsystem;
-        requestBufferSubsystem = new RequestBuffer();
+        RequestBuffer requestBuffer;
+        requestBuffer = new RequestBuffer();
 
-        floor = new Thread( new Floor(requestBufferSubsystem));
-        elevator = new Thread( new Elevator(requestBufferSubsystem));
+        Scheduler scheduler = new Scheduler(requestBuffer);
+        schedulerThread = new Thread(scheduler);
+        floor = new Thread( new Floor(scheduler));
+        elevator = new Thread( new Elevator(scheduler));
 
+        schedulerThread.start();
         floor.start();
         elevator.start();
     }

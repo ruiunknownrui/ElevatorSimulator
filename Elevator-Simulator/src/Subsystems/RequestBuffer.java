@@ -21,6 +21,10 @@ public class RequestBuffer {
         floorDone = true;
     }
 
+    public boolean getFloorDone(){
+        return floorDone;
+    }
+
     public boolean notFinish(){
         if(this.events.isEmpty() && floorDone) {
             schedulerDone = true;
@@ -29,8 +33,8 @@ public class RequestBuffer {
     }
 
     public synchronized void addToEvents(Event e){
-        System.out.println("Scheduler received request from floor " + e.getFloor() + " to go " + e.getFloorButton() +
-                " to floor " + e.getCarButton() + ".");
+//        System.out.println("Scheduler received request from floor " + e.getFloor() + " to go " + e.getFloorButton() +
+//                " to floor " + e.getCarButton() + ".");
         this.events.add(e);
         notifyAll();
         try{
@@ -39,7 +43,7 @@ public class RequestBuffer {
     }
 
     public synchronized Event getNextEvent(){
-        while(events.isEmpty() && !schedulerDone){
+        while(events.isEmpty() ){
             try{
                 wait();
             } catch (InterruptedException e){

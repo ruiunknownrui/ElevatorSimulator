@@ -4,11 +4,12 @@ import Data.Event;
 
 public class Elevator implements Runnable{
 
-    private RequestBuffer requestBuffer;
+//    private RequestBuffer requestBuffer;
+    private Scheduler schedulerSystem;
     private int currentFloor;
 
-    public Elevator(RequestBuffer s){
-        this.requestBuffer = s;
+    public Elevator(Scheduler s){
+        this.schedulerSystem = s;
         this.currentFloor = 1;
     }
 
@@ -27,9 +28,11 @@ public class Elevator implements Runnable{
     }
 
     public void run(){
-        while (requestBuffer.notFinish()){
+//        while (requestBuffer.notFinish()){
+        while (true){
             //TODO: Process event and make scheduler inactive.
-            Event e= requestBuffer.getNextEvent();
+//            Event e= requestBuffer.getNextEvent();
+            Event e = schedulerSystem.replyWork();
             System.out.println("Elevator received request from Scheduler " + e.getFloor() + " to go " + e.getFloorButton() +
                     " to floor " + e.getCarButton() + ".");
            try{
