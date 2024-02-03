@@ -10,17 +10,13 @@ import java.util.Scanner;
 
 public class Floor implements Runnable{
 
-//    private RequestBuffer requestBuffer;
-//
-//    public Floor(RequestBuffer s){this.requestBuffer = s;}
-
     private Scheduler schedulerSystem;
 
     public Floor(Scheduler schedulerSystem){
         this.schedulerSystem = schedulerSystem;
     }
 
-    private ArrayList<Event> readInput() {
+    public ArrayList<Event> readInput() {
         File events = new File("Elevator-Simulator/src/input.txt");
         ArrayList<Event> eventsData = new ArrayList<>();
 
@@ -53,9 +49,9 @@ public class Floor implements Runnable{
         ArrayList<Event> eventsInput = readInput();
         for (Event event : eventsInput) {
 //            this.requestBuffer.addToEvents(event);
-            schedulerSystem.addEvent(event);  // Sends request to scheduler system
             System.out.println("Floor sends request to Scheduler " + event.getFloor() +
                     " to go " + event.getFloorButton() + " to floor " + event.getCarButton() + ".");
+            schedulerSystem.addEvent(event);  // Sends request to scheduler system
             try{
                 Thread.sleep(200);
             } catch (InterruptedException e) { return; }
