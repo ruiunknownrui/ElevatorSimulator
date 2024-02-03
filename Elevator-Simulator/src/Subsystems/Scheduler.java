@@ -30,10 +30,18 @@ public class Scheduler implements Runnable{
         this.requestBuffer = requestBuffer;
         floorDone = false;
     }
+
+    /**
+     * Set the state of variable floorDone when the floor has done its work
+     */
     public static void floorDone() {
         floorDone = true;
     }
 
+    /**
+     * Check if all the transmissions have finished
+     * @return true if all transmissions is done; false otherwise
+     */
     public boolean notFinish(){
         if(requestBuffer.isEmpty() && floorDone) {
             schedulerDone = true;
@@ -86,7 +94,6 @@ public class Scheduler implements Runnable{
                 schedulerDone = true;
                 System.out.println("Scheduler done");
             }
-            //System.out.println("call nf from s");
         }
     }
 }

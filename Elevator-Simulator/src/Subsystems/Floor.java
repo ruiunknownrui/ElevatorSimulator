@@ -8,6 +8,9 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+/**
+ * The Floor class simulates the behavior of a floor subclass in the Elevator-Simulator project
+ */
 public class Floor implements Runnable{
 
     private Scheduler schedulerSystem;
@@ -16,6 +19,10 @@ public class Floor implements Runnable{
         this.schedulerSystem = schedulerSystem;
     }
 
+    /**
+     *Reads the input file for the requests
+     * @return an ArrayLis of events that represents the requests
+     */
     private ArrayList<Event> readInput() {
         File events = new File("Elevator-Simulator/src/input.txt");
         ArrayList<Event> eventsData = new ArrayList<>();
@@ -45,6 +52,10 @@ public class Floor implements Runnable{
 
         return eventsData;
     }
+
+    /**
+     * Run the floor thread
+     */
     public void run(){
         ArrayList<Event> eventsInput = readInput();
         for (Event event : eventsInput) {
