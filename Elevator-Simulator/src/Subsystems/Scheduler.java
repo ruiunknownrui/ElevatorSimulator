@@ -37,7 +37,7 @@ public class Scheduler implements Runnable{
     public boolean notFinish(){
         if(requestBuffer.isEmpty() && floorDone) {
             schedulerDone = true;
-            System.out.println("dfvuliev;iW");
+            System.out.println("Scheduler done");
         }
         return (!schedulerDone);
     }
@@ -47,9 +47,9 @@ public class Scheduler implements Runnable{
      * @param event
      */
     public void addEvent(Event event){
-        requestBuffer.addToEvents(event);
         System.out.print(reI + " - ");
         reI += 1;
+        requestBuffer.addToEvents(event);
         System.out.println("Scheduler received request from floor " + event.getFloor() +
                 " to go " + event.getFloorButton() +
                 " to floor " + event.getCarButton() + ".");
@@ -68,9 +68,9 @@ public class Scheduler implements Runnable{
      * @return  Event
      */
     public Event replyWork(){
-        Event work = requestBuffer.getNextEvent();  // Get event from the  buffer
-        System.out.print(sendI + " - ");
+       System.out.print(sendI + " - ");
         sendI += 1;
+        Event work = requestBuffer.getNextEvent();  // Get event from the  buffer
         System.out.println("Scheduler sent work to Elevator " + work.getFloor() +
                 " to go " + work.getFloorButton() + " to floor " + work.getCarButton() + ".");
         return work;
@@ -84,8 +84,9 @@ public class Scheduler implements Runnable{
         while (notFinish()){
             if(requestBuffer.isEmpty() && floorDone) {
                 schedulerDone = true;
-                System.out.println("dfvuliev;iW");
+                System.out.println("Scheduler done");
             }
+            //System.out.println("call nf from s");
         }
     }
 }

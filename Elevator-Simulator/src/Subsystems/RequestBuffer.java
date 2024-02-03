@@ -15,9 +15,6 @@ public class RequestBuffer {
     public synchronized void addToEvents(Event e){
         this.events.add(e);
         notifyAll();
-        try{
-            Thread.sleep(300);
-        } catch (InterruptedException ignored) {}
     }
 
     public synchronized Event getNextEvent(){

@@ -56,5 +56,6 @@ public class Floor implements Runnable{
             } catch (InterruptedException e) { return; }
         }
         Scheduler.floorDone();
+        System.out.println("floor done");
     }
 }
