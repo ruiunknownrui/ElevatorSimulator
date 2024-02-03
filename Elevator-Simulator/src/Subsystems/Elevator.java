@@ -1,15 +1,15 @@
 package Subsystems;
 
 import Data.Event;
-import States.SchedulerState;
 
 public class Elevator implements Runnable{
 
-    private Scheduler scheduler;
+//    private RequestBuffer requestBuffer;
+    private Scheduler schedulerSystem;
     private int currentFloor;
 
     public Elevator(Scheduler s){
-        this.scheduler = s;
+        this.schedulerSystem = s;
         this.currentFloor = 1;
     }
 
@@ -28,13 +28,16 @@ public class Elevator implements Runnable{
     }
 
     public void run(){
-        Event data = scheduler.getNextEvent();
-        while(data != null) {
-            System.out.println("Elevator received data from Scheduler.");
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) { return; }
-            data = scheduler.getNextEvent();
+//        while (requestBuffer.notFinish()){
+        while (true){
+            //TODO: Process event and make scheduler inactive.
+//            Event e= requestBuffer.getNextEvent();
+            Event e = schedulerSystem.replyWork();
+            System.out.println("Elevator received request from Scheduler " + e.getFloor() + " to go " + e.getFloorButton() +
+                    " to floor " + e.getCarButton() + ".");
+           try{
+                Thread.sleep(400);
+            } catch (InterruptedException ignored) {}
         }
     }
 }

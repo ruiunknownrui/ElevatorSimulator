@@ -2,7 +2,7 @@ package Subsystems;
 
 import Data.Direction;
 import Data.Event;
-import States.SchedulerState;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -10,12 +10,18 @@ import java.util.Scanner;
 
 public class Floor implements Runnable{
 
-    private Scheduler scheduler;
+//    private RequestBuffer requestBuffer;
+//
+//    public Floor(RequestBuffer s){this.requestBuffer = s;}
 
-    public Floor(Scheduler s){this.scheduler = s;}
+    private Scheduler schedulerSystem;
+
+    public Floor(Scheduler schedulerSystem){
+        this.schedulerSystem = schedulerSystem;
+    }
 
     private ArrayList<Event> readInput() {
-        File events = new File("src/input.txt");
+        File events = new File("Elevator-Simulator/src/input.txt");
         ArrayList<Event> eventsData = new ArrayList<>();
 
         try {
@@ -46,10 +52,14 @@ public class Floor implements Runnable{
     public void run(){
         ArrayList<Event> eventsInput = readInput();
         for (Event event : eventsInput) {
-            this.scheduler.addToEvents(event);
+//            this.requestBuffer.addToEvents(event);
+            schedulerSystem.addEvent(event);  // Sends request to scheduler system
+            System.out.println("Floor sends request to Scheduler " + event.getFloor() +
+                    " to go " + event.getFloorButton() + " to floor " + event.getCarButton() + ".");
             try{
-                Thread.sleep(500);
+                Thread.sleep(200);
             } catch (InterruptedException e) { return; }
         }
+        RequestBuffer.floorDone();
     }
 }
