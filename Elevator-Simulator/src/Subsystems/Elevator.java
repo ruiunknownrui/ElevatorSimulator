@@ -6,6 +6,11 @@ public class Elevator implements Runnable{
 
 //    private RequestBuffer requestBuffer;
     private Scheduler schedulerSystem;
+
+    public int getCurrentFloor() {
+        return currentFloor;
+    }
+
     private int currentFloor;
 
     public Elevator(Scheduler s){
