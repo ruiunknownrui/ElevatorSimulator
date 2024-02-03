@@ -10,10 +10,6 @@ import java.util.Scanner;
 
 public class Floor implements Runnable{
 
-//    private RequestBuffer requestBuffer;
-//
-//    public Floor(RequestBuffer s){this.requestBuffer = s;}
-
     private Scheduler schedulerSystem;
 
     public Floor(Scheduler schedulerSystem){
@@ -52,14 +48,13 @@ public class Floor implements Runnable{
     public void run(){
         ArrayList<Event> eventsInput = readInput();
         for (Event event : eventsInput) {
-//            this.requestBuffer.addToEvents(event);
             schedulerSystem.addEvent(event);  // Sends request to scheduler system
             System.out.println("Floor sends request to Scheduler " + event.getFloor() +
                     " to go " + event.getFloorButton() + " to floor " + event.getCarButton() + ".");
             try{
-                Thread.sleep(200);
+                Thread.sleep(300);
             } catch (InterruptedException e) { return; }
         }
-        RequestBuffer.floorDone();
+        Scheduler.floorDone();
     }
 }

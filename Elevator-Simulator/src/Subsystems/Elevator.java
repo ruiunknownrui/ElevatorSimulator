@@ -4,7 +4,6 @@ import Data.Event;
 
 public class Elevator implements Runnable{
 
-//    private RequestBuffer requestBuffer;
     private Scheduler schedulerSystem;
     private int currentFloor;
 
@@ -28,15 +27,13 @@ public class Elevator implements Runnable{
     }
 
     public void run(){
-//        while (requestBuffer.notFinish()){
-        while (true){
+        while (schedulerSystem.notFinish()){
             //TODO: Process event and make scheduler inactive.
-//            Event e= requestBuffer.getNextEvent();
             Event e = schedulerSystem.replyWork();
             System.out.println("Elevator received request from Scheduler " + e.getFloor() + " to go " + e.getFloorButton() +
                     " to floor " + e.getCarButton() + ".");
            try{
-                Thread.sleep(400);
+                Thread.sleep(300);
             } catch (InterruptedException ignored) {}
         }
     }
