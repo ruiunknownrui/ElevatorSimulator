@@ -43,7 +43,7 @@ public class Elevator implements Runnable{
      *Run the elevator thread
      */
     public void run(){
-        while (schedulerSystem.notFinish()){
+        while (schedulerSystem.keepSending()){
             System.out.println("call nf from E");
             //TODO: Process event and make scheduler inactive.
             Event e = schedulerSystem.replyWork();
@@ -53,5 +53,6 @@ public class Elevator implements Runnable{
                 Thread.sleep(400);
             } catch (InterruptedException ignored) {}
         }
+        System.out.println("elevator done");
     }
 }
