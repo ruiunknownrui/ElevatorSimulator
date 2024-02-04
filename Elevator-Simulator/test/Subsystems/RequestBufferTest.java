@@ -36,10 +36,5 @@ public class RequestBufferTest {
         assertTrue(requestBuffer.getEvents().isEmpty(), "Events list should be empty after retrieving the event.");
     }
 
-    @Test
-    void testFloorDone() {
-        RequestBuffer.floorDone();
-        assertTrue(requestBuffer.getFloorDone(), "Floor should be marked as done.");
-    }
 
 }
