@@ -2,7 +2,6 @@ package Subsystems;
 
 import Data.Event;
 
-import java.util.ArrayList;
 
 /**
  * Scheduler class keep adding requests from floor to the buffer
@@ -10,54 +9,64 @@ import java.util.ArrayList;
  */
 public class Scheduler implements Runnable{
 
-    private ArrayList<Event> events;  // A list of all events received from floor
     private RequestBuffer requestBuffer;
-//    private boolean hasRequest = true;
+    private static boolean floorDone;
+    private int totalRequest;
+    private int numOfSend;
 
-    // only used to test if all test cases are received, send and add
-    // TODO: delete before submit
-    private int addI = 1;
-    private int sendI = 1;
-    private int reI = 1;
 
     /**
      * Scheduler creates an empty event list
      * @param requestBuffer
      */
     public Scheduler(RequestBuffer requestBuffer){
-        this.events = new ArrayList<>();
         this.requestBuffer = requestBuffer;
+        floorDone = false;
+        totalRequest = 0;
+        numOfSend = 0;
     }
 
-//    private void updateHasRequest() {
-//        if (requestBuffer.getFloorDone() && events.isEmpty()){
-//            hasRequest = false;
-//        }
-//    }
-//
-//    public boolean getHasRequest(){
-//        return hasRequest;
-//    }
+    /**
+     * Set the state of variable floorDone when the floor has done its work
+     */
+    public static void floorDone() {
+        floorDone = true;
+    }
+
+    /**
+     * setTotalRequest sets the total number of requests sent from floor
+     * @param numOfTotal  the total number of requests
+     */
+    public void setTotalRequest(int numOfTotal){
+        totalRequest = numOfTotal;
+        System.out.println("total request: " + totalRequest);
+    }
+
+    /**
+     * getTotalRequest returns the total number of requests received from the floor (Only used in Unit Test)
+     * @return  total number of request
+     */
+    public int getTotalRequest(){
+        return totalRequest;
+    }
+
+    /**
+     * keepSending indicate if the thread is good enough to stop
+     * @return   true if floor finish sending all requests and all requests are sent to elevator
+     */
+    public boolean keepSending(){
+        return !(floorDone && totalRequest == numOfSend);
+    }
 
     /**
      * addEvent adds event to the event list
      * @param event
      */
     public void addEvent(Event event){
-        events.add(event);
-        System.out.print(reI + " - ");
-        reI += 1;
+        requestBuffer.addToEvents(event);
         System.out.println("Scheduler received request from floor " + event.getFloor() +
                 " to go " + event.getFloorButton() +
                 " to floor " + event.getCarButton() + ".");
-    }
-
-    /**
-     * getEvents returns the list of event  (only used in unit test)
-     * @return ArrayList
-     */
-    public ArrayList<Event> getEvents(){
-        return events;
     }
 
     /**
@@ -65,12 +74,10 @@ public class Scheduler implements Runnable{
      * @return  Event
      */
     public Event replyWork(){
+        numOfSend += 1;
         Event work = requestBuffer.getNextEvent();  // Get event from the  buffer
-        System.out.print(sendI + " - ");
-        sendI += 1;
         System.out.println("Scheduler sent work to Elevator " + work.getFloor() +
                 " to go " + work.getFloorButton() + " to floor " + work.getCarButton() + ".");
-//        updateHasRequest();
         return work;
     }
 
@@ -79,19 +86,11 @@ public class Scheduler implements Runnable{
      */
     @Override
     public void run() {
-        while (true){
-            if(!events.isEmpty()){  // If there is request in the scheduler
-                Event firstEvent = events.getFirst();  // Gets the first request in the list
-                requestBuffer.addToEvents(firstEvent);  // Adds request to the buffer
-                System.out.print(addI + " - ");
-                addI += 1;
-                System.out.println("Scheduler add request to buffer " + firstEvent.getFloor() +
-                        " to go " + firstEvent.getFloorButton() + " to floor " + firstEvent.getCarButton() + ".");
-                events.remove(firstEvent);  // Removes the request from the list
-            }
+        while (keepSending()){
             try{
-                Thread.sleep(400);
+                Thread.sleep(500);
             } catch (InterruptedException ignored) {}
         }
+        System.out.println("Scheduler done");
     }
 }

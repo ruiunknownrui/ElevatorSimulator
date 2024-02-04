@@ -8,11 +8,11 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+/**
+ * Class name: Floor
+ * Purpose: Represents the Floor subsystem, sends events/requests to the Scheduler subsystem.
+ */
 public class Floor implements Runnable{
-
-//    private RequestBuffer requestBuffer;
-//
-//    public Floor(RequestBuffer s){this.requestBuffer = s;}
 
     private Scheduler schedulerSystem;
 
@@ -20,7 +20,14 @@ public class Floor implements Runnable{
         this.schedulerSystem = schedulerSystem;
     }
 
-    private ArrayList<Event> readInput() {
+    /**
+     * Name: readInput()
+     * Purpose: Opens the input file and reads it line by line, creating an Event object for each line of the file
+     *          then returns the final list of all the Event objects.
+     * In: Input file.
+     * @return List of events read from input file.
+     */
+    public ArrayList<Event> readInput() {
         File events = new File("Elevator-Simulator/src/input.txt");
         ArrayList<Event> eventsData = new ArrayList<>();
 
@@ -46,20 +53,30 @@ public class Floor implements Runnable{
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
         return eventsData;
     }
+
+    /**
+     * Name: run()
+     * Purpose: Run function for Floor thread. Loops through list of events read from input file and passes
+     *          each one to the scheduler thread.
+     * In: None
+     * Out: None
+     */
     public void run(){
         ArrayList<Event> eventsInput = readInput();
+        int totalRequest = 0;
         for (Event event : eventsInput) {
-//            this.requestBuffer.addToEvents(event);
-            schedulerSystem.addEvent(event);  // Sends request to scheduler system
+            totalRequest += 1;
             System.out.println("Floor sends request to Scheduler " + event.getFloor() +
                     " to go " + event.getFloorButton() + " to floor " + event.getCarButton() + ".");
+            schedulerSystem.addEvent(event);  // Sends request to scheduler system
             try{
-                Thread.sleep(200);
+                Thread.sleep(300);
             } catch (InterruptedException e) { return; }
         }
-        RequestBuffer.floorDone();
+        schedulerSystem.setTotalRequest(totalRequest);
+        Scheduler.floorDone();
+        System.out.println("floor done");
     }
 }
