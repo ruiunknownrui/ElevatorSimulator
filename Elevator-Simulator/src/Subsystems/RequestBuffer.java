@@ -45,5 +45,13 @@ public class RequestBuffer {
         return eV;
     }
 
+    /**
+     * getEvents return an arrayList of events (only used for Unit Test)
+     * @return an array list of events
+     */
+    public ArrayList<Event> getEvents(){
+        return events;
+    }
+
 }
 
