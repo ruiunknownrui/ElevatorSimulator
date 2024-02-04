@@ -70,9 +70,10 @@ public class Floor implements Runnable{
                     " to go " + event.getFloorButton() + " to floor " + event.getCarButton() + ".");
             schedulerSystem.addEvent(event);  // Sends request to scheduler system
             try{
-                Thread.sleep(200);
+                Thread.sleep(300);
             } catch (InterruptedException e) { return; }
         }
-        RequestBuffer.floorDone();
+        Scheduler.floorDone();
+        System.out.println("floor done");
     }
 }

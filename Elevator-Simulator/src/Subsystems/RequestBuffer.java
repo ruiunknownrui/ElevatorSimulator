@@ -4,46 +4,35 @@ import Data.Event;
 
 import java.util.ArrayList;
 
+/**
+ *The requestBuffer class is a thread-safe class for the Scheduler to save the requests received
+ */
 public class RequestBuffer {
 
-    private boolean readable;
     private ArrayList<Event> events;
-    private static boolean floorDone;
-    private boolean schedulerDone = false;
 
+    /**
+     * Create a new RequestBuffer class
+     */
     public RequestBuffer(){
-        this.readable = false;
         this.events = new ArrayList<>();
-        floorDone = false;
     }
 
-    public static void floorDone() {
-        floorDone = true;
-    }
-
-    public boolean getFloorDone(){
-        return floorDone;
-    }
-
-    public boolean notFinish(){
-        if(this.events.isEmpty() && floorDone) {
-            schedulerDone = true;
-        }
-        return (!floorDone || !schedulerDone);
-    }
-
+    /**
+     * Add new request into the RequestBuffer
+     * @param e the new request to add
+     */
     public synchronized void addToEvents(Event e){
-//        System.out.println("Scheduler received request from floor " + e.getFloor() + " to go " + e.getFloorButton() +
-//                " to floor " + e.getCarButton() + ".");
         this.events.add(e);
         notifyAll();
-        try{
-            Thread.sleep(400);
-        } catch (InterruptedException ignored) {}
     }
 
+    /**
+     * Return the next request stored in the RequestBuffer and remove it
+     * @return the next request in the RequestBuffer
+     */
     public synchronized Event getNextEvent(){
-        while(events.isEmpty() ){
+        while(events.isEmpty()){
             try{
                 wait();
             } catch (InterruptedException e){
@@ -54,6 +43,15 @@ public class RequestBuffer {
         Event eV = this.events.removeFirst();
         notifyAll();
         return eV;
+    }
+
+    /**\
+     * Check if the RequestBuffer is empty
+     * @return true if there's no request in the requestBuffer;
+     *         false otherwise
+     */
+    public boolean isEmpty() {
+        return events.isEmpty();
     }
 }
 

@@ -12,11 +12,12 @@ public class Scheduler implements Runnable{
 
     private ArrayList<Event> events;  // A list of all events received from floor
     private RequestBuffer requestBuffer;
-//    private boolean hasRequest = true;
+    private static boolean floorDone;
+    private boolean schedulerDone = false;
+
 
     // only used to test if all test cases are received, send and add
     // TODO: delete before submit
-    private int addI = 1;
     private int sendI = 1;
     private int reI = 1;
 
@@ -27,26 +28,36 @@ public class Scheduler implements Runnable{
     public Scheduler(RequestBuffer requestBuffer){
         this.events = new ArrayList<>();
         this.requestBuffer = requestBuffer;
+        floorDone = false;
     }
 
-//    private void updateHasRequest() {
-//        if (requestBuffer.getFloorDone() && events.isEmpty()){
-//            hasRequest = false;
-//        }
-//    }
-//
-//    public boolean getHasRequest(){
-//        return hasRequest;
-//    }
+    /**
+     * Set the state of variable floorDone when the floor has done its work
+     */
+    public static void floorDone() {
+        floorDone = true;
+    }
+
+    /**
+     * Check if all the transmissions have finished
+     * @return true if all transmissions is done; false otherwise
+     */
+    public boolean notFinish(){
+        if(requestBuffer.isEmpty() && floorDone) {
+            schedulerDone = true;
+            System.out.println("Scheduler done");
+        }
+        return (!schedulerDone);
+    }
 
     /**
      * addEvent adds event to the event list
      * @param event
      */
     public void addEvent(Event event){
-        events.add(event);
         System.out.print(reI + " - ");
         reI += 1;
+        requestBuffer.addToEvents(event);
         System.out.println("Scheduler received request from floor " + event.getFloor() +
                 " to go " + event.getFloorButton() +
                 " to floor " + event.getCarButton() + ".");
@@ -65,12 +76,11 @@ public class Scheduler implements Runnable{
      * @return  Event
      */
     public Event replyWork(){
-        Event work = requestBuffer.getNextEvent();  // Get event from the  buffer
-        System.out.print(sendI + " - ");
+       System.out.print(sendI + " - ");
         sendI += 1;
+        Event work = requestBuffer.getNextEvent();  // Get event from the  buffer
         System.out.println("Scheduler sent work to Elevator " + work.getFloor() +
                 " to go " + work.getFloorButton() + " to floor " + work.getCarButton() + ".");
-//        updateHasRequest();
         return work;
     }
 
@@ -79,19 +89,11 @@ public class Scheduler implements Runnable{
      */
     @Override
     public void run() {
-        while (true){
-            if(!events.isEmpty()){  // If there is request in the scheduler
-                Event firstEvent = events.getFirst();  // Gets the first request in the list
-                requestBuffer.addToEvents(firstEvent);  // Adds request to the buffer
-                System.out.print(addI + " - ");
-                addI += 1;
-                System.out.println("Scheduler add request to buffer " + firstEvent.getFloor() +
-                        " to go " + firstEvent.getFloorButton() + " to floor " + firstEvent.getCarButton() + ".");
-                events.remove(firstEvent);  // Removes the request from the list
+        while (notFinish()){
+            if(requestBuffer.isEmpty() && floorDone) {
+                schedulerDone = true;
+                System.out.println("Scheduler done");
             }
-            try{
-                Thread.sleep(400);
-            } catch (InterruptedException ignored) {}
         }
     }
 }
