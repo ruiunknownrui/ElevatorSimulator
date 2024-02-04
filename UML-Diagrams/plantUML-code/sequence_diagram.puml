@@ -1,0 +1,19 @@
+@startuml
+actor Floor
+entity Scheduler
+actor Elevator
+
+== Initialization ==
+Floor -> Scheduler: Create
+Floor -> Elevator: Create
+
+== Operation ==
+loop until all events are processed
+    Floor -> Floor: readInput()
+    Floor -> Scheduler: addEvent(Event)
+    Scheduler -> Elevator: schedule(Event)
+    Elevator -> Elevator: moveUp() / moveDown()
+    Elevator -> Scheduler: updateState()
+    Scheduler -> Floor: update(Event)
+end
+@enduml
