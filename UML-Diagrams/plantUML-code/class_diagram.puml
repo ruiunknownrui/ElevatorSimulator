@@ -9,6 +9,7 @@ enum SchedulerState {
     +INACTIVE
 }
 
+
 class Event {
     -time: int
     -floor: int
@@ -22,7 +23,6 @@ class Event {
 
 class Floor {
     -scheduler: Scheduler
-    -requestBuffer: RequestBuffer
     +run(): void
     +readInput(): void
 }
@@ -38,7 +38,6 @@ class Elevator {
 class Scheduler {
     -state: SchedulerState
     -events: List<Event>
-    -requestBuffer: RequestBuffer
     +run(): void
     +schedule(): void
     +addEvent(event: Event): void
@@ -55,8 +54,7 @@ class RequestBuffer {
 
 
 
-Floor -right-> Scheduler : uses
-Floor -down-> RequestBuffer : uses
+Floor -down-> Scheduler : uses
 Elevator -left-> Scheduler : uses
 Scheduler -down-> RequestBuffer : uses
 Scheduler "1" *-- "*" Event : contains
