@@ -8,6 +8,11 @@ import Data.Event;
 public class Elevator implements Runnable{
 
     private Scheduler schedulerSystem;
+
+    public int getCurrentFloor() {
+        return currentFloor;
+    }
+
     private int currentFloor;
 
     /**
