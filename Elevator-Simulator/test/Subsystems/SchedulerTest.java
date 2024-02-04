@@ -1,8 +1,9 @@
 package Subsystems;
 
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
+import Data.Event;
+import Data.Direction;
 
 public class SchedulerTest {
 
@@ -20,9 +21,9 @@ public class SchedulerTest {
 
     @Test
     void addEvent(){
-        RequestBuffer newBeffer = new RequestBuffer();
-        Scheduler scheduler = new Scheduler(newBeffer);
-        Event aEvent = new Event(1, 1, Direction.Up, 3);
+        RequestBuffer newBuffer = new RequestBuffer();
+        Scheduler scheduler = new Scheduler(newBuffer);
+        Event aEvent = new Event("1", 1, Direction.Up, 3);
         scheduler.addEvent(aEvent);
         assertEquals(1, scheduler.getEvents().size());
     }

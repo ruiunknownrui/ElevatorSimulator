@@ -9,7 +9,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * The Floor class simulates the behavior of a floor subclass in the Elevator-Simulator project
+ * Class name: Floor
+ * Purpose: Represents the Floor subsystem, sends events/requests to the Scheduler subsystem.
  */
 public class Floor implements Runnable{
 
@@ -20,10 +21,13 @@ public class Floor implements Runnable{
     }
 
     /**
-     *Reads the input file for the requests
-     * @return an ArrayLis of events that represents the requests
+     * Name: readInput()
+     * Purpose: Opens the input file and reads it line by line, creating an Event object for each line of the file
+     *          then returns the final list of all the Event objects.
+     * In: Input file.
+     * @return List of events read from input file.
      */
-    private ArrayList<Event> readInput() {
+    public ArrayList<Event> readInput() {
         File events = new File("Elevator-Simulator/src/input.txt");
         ArrayList<Event> eventsData = new ArrayList<>();
 
@@ -49,19 +53,22 @@ public class Floor implements Runnable{
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
         return eventsData;
     }
 
     /**
-     * Run the floor thread
+     * Name: run()
+     * Purpose: Run function for Floor thread. Loops through list of events read from input file and passes
+     *          each one to the scheduler thread.
+     * In: None
+     * Out: None
      */
     public void run(){
         ArrayList<Event> eventsInput = readInput();
         for (Event event : eventsInput) {
-            schedulerSystem.addEvent(event);  // Sends request to scheduler system
             System.out.println("Floor sends request to Scheduler " + event.getFloor() +
                     " to go " + event.getFloorButton() + " to floor " + event.getCarButton() + ".");
+            schedulerSystem.addEvent(event);  // Sends request to scheduler system
             try{
                 Thread.sleep(300);
             } catch (InterruptedException e) { return; }
