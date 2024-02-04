@@ -2,7 +2,6 @@ package Subsystems;
 
 import Data.Event;
 
-import java.util.ArrayList;
 
 /**
  * Scheduler class keep adding requests from floor to the buffer
@@ -10,25 +9,21 @@ import java.util.ArrayList;
  */
 public class Scheduler implements Runnable{
 
-    private ArrayList<Event> events;  // A list of all events received from floor
     private RequestBuffer requestBuffer;
     private static boolean floorDone;
-    private boolean schedulerDone = false;
+    private int totalRequest;
+    private int numOfSend;
 
-
-    // only used to test if all test cases are received, send and add
-    // TODO: delete before submit
-    private int sendI = 1;
-    private int reI = 1;
 
     /**
      * Scheduler creates an empty event list
      * @param requestBuffer
      */
     public Scheduler(RequestBuffer requestBuffer){
-        this.events = new ArrayList<>();
         this.requestBuffer = requestBuffer;
         floorDone = false;
+        totalRequest = 0;
+        numOfSend = 0;
     }
 
     /**
@@ -39,15 +34,20 @@ public class Scheduler implements Runnable{
     }
 
     /**
-     * Check if all the transmissions have finished
-     * @return true if all transmissions is done; false otherwise
+     * setTotalRequest sets the total number of requests sent from floor
+     * @param numOfTotal  the total number of requests
      */
-    public boolean notFinish(){
-        if(requestBuffer.isEmpty() && floorDone) {
-            schedulerDone = true;
-            System.out.println("Scheduler done");
-        }
-        return (!schedulerDone);
+    public void setTotalRequest(int numOfTotal){
+        totalRequest = numOfTotal;
+        System.out.println("total request: " + totalRequest);
+    }
+
+    /**
+     * keepSending indicate if the thread is good enough to stop
+     * @return   true if floor finish sending all requests and all requests are sent to elevator
+     */
+    public boolean keepSending(){
+        return !(floorDone && totalRequest == numOfSend);
     }
 
     /**
@@ -55,8 +55,6 @@ public class Scheduler implements Runnable{
      * @param event
      */
     public void addEvent(Event event){
-        System.out.print(reI + " - ");
-        reI += 1;
         requestBuffer.addToEvents(event);
         System.out.println("Scheduler received request from floor " + event.getFloor() +
                 " to go " + event.getFloorButton() +
@@ -64,20 +62,11 @@ public class Scheduler implements Runnable{
     }
 
     /**
-     * getEvents returns the list of event  (only used in unit test)
-     * @return ArrayList
-     */
-    public ArrayList<Event> getEvents(){
-        return events;
-    }
-
-    /**
      * replyWork returns uncompleted work.
      * @return  Event
      */
     public Event replyWork(){
-       System.out.print(sendI + " - ");
-        sendI += 1;
+        numOfSend += 1;
         Event work = requestBuffer.getNextEvent();  // Get event from the  buffer
         System.out.println("Scheduler sent work to Elevator " + work.getFloor() +
                 " to go " + work.getFloorButton() + " to floor " + work.getCarButton() + ".");
@@ -89,11 +78,11 @@ public class Scheduler implements Runnable{
      */
     @Override
     public void run() {
-        while (notFinish()){
-            if(requestBuffer.isEmpty() && floorDone) {
-                schedulerDone = true;
-                System.out.println("Scheduler done");
-            }
+        while (keepSending()){
+            try{
+                Thread.sleep(500);
+            } catch (InterruptedException ignored) {}
         }
+        System.out.println("Scheduler done");
     }
 }

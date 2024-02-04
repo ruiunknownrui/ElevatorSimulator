@@ -45,13 +45,5 @@ public class RequestBuffer {
         return eV;
     }
 
-    /**\
-     * Check if the RequestBuffer is empty
-     * @return true if there's no request in the requestBuffer;
-     *         false otherwise
-     */
-    public boolean isEmpty() {
-        return events.isEmpty();
-    }
 }
 

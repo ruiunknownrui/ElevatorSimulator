@@ -58,7 +58,9 @@ public class Floor implements Runnable{
      */
     public void run(){
         ArrayList<Event> eventsInput = readInput();
+        int totalRequest = 0;
         for (Event event : eventsInput) {
+            totalRequest += 1;
             schedulerSystem.addEvent(event);  // Sends request to scheduler system
             System.out.println("Floor sends request to Scheduler " + event.getFloor() +
                     " to go " + event.getFloorButton() + " to floor " + event.getCarButton() + ".");
@@ -66,6 +68,7 @@ public class Floor implements Runnable{
                 Thread.sleep(300);
             } catch (InterruptedException e) { return; }
         }
+        schedulerSystem.setTotalRequest(totalRequest);
         Scheduler.floorDone();
         System.out.println("floor done");
     }
