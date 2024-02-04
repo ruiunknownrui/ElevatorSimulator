@@ -43,6 +43,14 @@ public class Scheduler implements Runnable{
     }
 
     /**
+     * getTotalRequest returns the total number of requests received from the floor (Only used in Unit Test)
+     * @return  total number of request
+     */
+    public int getTotalRequest(){
+        return totalRequest;
+    }
+
+    /**
      * keepSending indicate if the thread is good enough to stop
      * @return   true if floor finish sending all requests and all requests are sent to elevator
      */
