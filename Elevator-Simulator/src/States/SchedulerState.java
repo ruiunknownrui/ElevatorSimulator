@@ -1,6 +1,8 @@
 package States;
 
-public enum SchedulerState {
-    Active,
-    Inactive
+public class SchedulerState{
+    public enum schedulerStates {
+        NoRequest, HasRequest, SendRequest, RequestFinish
+    }
 }
+
