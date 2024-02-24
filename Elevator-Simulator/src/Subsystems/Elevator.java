@@ -49,8 +49,6 @@ public class Elevator implements Runnable{
      */
     public void run(){
         while (schedulerSystem.keepSending()){
-            System.out.println("call nf from E");
-            //TODO: Process event and make scheduler inactive.
             Event e = schedulerSystem.replyWork();
             System.out.println("Elevator received request from Scheduler " + e.getFloor() + " to go " + e.getFloorButton() +
                     " to floor " + e.getCarButton() + ".");
