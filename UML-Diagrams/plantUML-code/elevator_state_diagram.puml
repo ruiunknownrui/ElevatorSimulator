@@ -1,0 +1,42 @@
+@startuml
+title Elevator State Machines
+
+state "Elevator" as ECS {
+  state "Door" as Door {
+    state "DOORS_CLOSED" as DC
+    state "DOORS_OPENING" as DOing
+    state "DOORS_OPEN" as DO
+    state "DOORS_CLOSING" as DCing
+    [*] --> DC
+    DC --> DOing : Open command
+    DOing --> DO : Fully open
+    DO --> DCing : Close command
+    DCing --> DC : Fully closed
+  }
+
+  state "Elevator Button" as EB {
+    state "OFF" as EBOFF
+    state "ON" as EBON
+    [*] --> EBOFF
+    EBOFF -right-> EBON : Button pressed
+    EBON -right-> EBOFF : Button released or destination reached
+  }
+
+  state "Motor" as Motor {
+    state "IDLE" as MIdle
+    state "ACCELERATING" as MAcc
+    state "MOVING_AT_MAX_VELOCITY" as MMaxV
+    state "DECELERATING" as MDec
+    [*] --> MIdle
+    MIdle --> MAcc : Start moving
+    MAcc --> MMaxV : Reach max speed
+    MMaxV --> MDec : Prepare to stop
+    MDec --> MIdle : Stop
+  }
+  [*] --> Door
+  Door --> EB : Door fully closed
+  EB --> Motor : Button ON and door closed
+  Motor --> Door : Motor idle
+}
+
+@enduml
