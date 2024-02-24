@@ -27,6 +27,7 @@ public class Scheduler implements Runnable{
         floorDone = false;
         totalRequest = 0;
         numOfSend = 0;
+        System.out.println(this.state.toString());
     }
 
     /**
@@ -71,7 +72,7 @@ public class Scheduler implements Runnable{
         System.out.println("Scheduler received request from floor " + event.getFloor() +
                 " to go " + event.getFloorButton() +
                 " to floor " + event.getCarButton() + ".");
-        System.out.println(state);
+        System.out.println(state.toString());
     }
 
     /**
@@ -84,7 +85,7 @@ public class Scheduler implements Runnable{
         if(requestBuffer.getEvents().isEmpty()) state.updateState();
         System.out.println("Scheduler sent work to Elevator " + work.getFloor() +
                 " to go " + work.getFloorButton() + " to floor " + work.getCarButton() + ".");
-        System.out.println(state);
+        System.out.println(state.toString());
         return work;
     }
 
@@ -99,6 +100,6 @@ public class Scheduler implements Runnable{
             } catch (InterruptedException ignored) {}
         }
         state.updateState();
-        System.out.println(state);
+        System.out.println(state.toString());
     }
 }

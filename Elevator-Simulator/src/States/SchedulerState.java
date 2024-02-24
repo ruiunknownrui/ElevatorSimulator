@@ -27,11 +27,19 @@ public class SchedulerState{
     }
 
     /**
-     * getCurrState return the currState. Only used in SchedulerStateTest
+     * getCurrState returns the currState. Only used in SchedulerStateTest
      * @return
      */
     public schedulerStates getCurrState(){
         return currState;
+    }
+
+    /**
+     * toString returns the current state in String
+     * @return
+     */
+    public String toString(){
+        return "Current Scheduler state is " + currState.toString();
     }
 }
 

@@ -28,7 +28,7 @@ public class Floor implements Runnable{
      * @return List of events read from input file.
      */
     public ArrayList<Event> readInput() {
-        File events = new File("src/input.txt");
+        File events = new File("Elevator-Simulator/src/input.txt");
         ArrayList<Event> eventsData = new ArrayList<>();
 
         try {
