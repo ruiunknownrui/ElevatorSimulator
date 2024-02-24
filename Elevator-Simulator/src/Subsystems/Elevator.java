@@ -1,6 +1,9 @@
 package Subsystems;
 
 import Data.Event;
+import States.ElevatorButton;
+import States.Door;
+import States.Motor;
 
 /**
  * The Elevator class simulates the behavior of an elevator car subsystem in the Elevator-Simulator project
@@ -8,12 +11,10 @@ import Data.Event;
 public class Elevator implements Runnable{
 
     private Scheduler schedulerSystem;
-
-    public int getCurrentFloor() {
-        return currentFloor;
-    }
-
     private int currentFloor;
+    private ElevatorButton[] elevatorButtons;
+    private Door elevatorDoors;
+    private Motor elevatorMotor;
 
     /**
      * Create an elevator that receive requests from the Scheduler
@@ -25,7 +26,14 @@ public class Elevator implements Runnable{
     }
 
     /**
-     * Move the elevator uo one floor
+     * @return the current floor the Elevator is on.
+     */
+    public int getCurrentFloor() {
+        return currentFloor;
+    }
+
+    /**
+     * Move the elevator up one floor
      */
     public void moveUp(){
         if(currentFloor < 8){
@@ -50,7 +58,7 @@ public class Elevator implements Runnable{
     public void run(){
         while (schedulerSystem.keepSending()){
             Event e = schedulerSystem.replyWork();
-            System.out.println("Elevator received request from Scheduler " + e.getFloor() + " to go " + e.getFloorButton() +
+            System.out.println("Elevator received request from Scheduler from Floor " + e.getFloor() + " to go " + e.getFloorButton() +
                     " to floor " + e.getCarButton() + ".");
            try{
                 Thread.sleep(400);
