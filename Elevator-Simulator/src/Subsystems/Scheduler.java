@@ -1,6 +1,7 @@
 package Subsystems;
 
 import Data.Event;
+import States.SchedulerState;
 
 
 /**
@@ -13,6 +14,7 @@ public class Scheduler implements Runnable{
     private static boolean floorDone;
     private int totalRequest;
     private int numOfSend;
+    private SchedulerState state;
 
 
     /**
@@ -21,6 +23,7 @@ public class Scheduler implements Runnable{
      */
     public Scheduler(RequestBuffer requestBuffer){
         this.requestBuffer = requestBuffer;
+        this.state = new SchedulerState();
         floorDone = false;
         totalRequest = 0;
         numOfSend = 0;
@@ -63,10 +66,12 @@ public class Scheduler implements Runnable{
      * @param event
      */
     public void addEvent(Event event){
+        if(requestBuffer.getEvents().isEmpty()) state.updateState();
         requestBuffer.addToEvents(event);
         System.out.println("Scheduler received request from floor " + event.getFloor() +
                 " to go " + event.getFloorButton() +
                 " to floor " + event.getCarButton() + ".");
+        System.out.println(state);
     }
 
     /**
@@ -76,8 +81,10 @@ public class Scheduler implements Runnable{
     public Event replyWork(){
         numOfSend += 1;
         Event work = requestBuffer.getNextEvent();  // Get event from the  buffer
+        if(requestBuffer.getEvents().isEmpty()) state.updateState();
         System.out.println("Scheduler sent work to Elevator " + work.getFloor() +
                 " to go " + work.getFloorButton() + " to floor " + work.getCarButton() + ".");
+        System.out.println(state);
         return work;
     }
 
@@ -91,6 +98,7 @@ public class Scheduler implements Runnable{
                 Thread.sleep(500);
             } catch (InterruptedException ignored) {}
         }
-        System.out.println("Scheduler done");
+        state.updateState();
+        System.out.println(state);
     }
 }
