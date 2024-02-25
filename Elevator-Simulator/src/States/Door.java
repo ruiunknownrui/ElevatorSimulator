@@ -1,7 +1,13 @@
 package States;
 
+/**
+ * Class for the state machine of the Door subcomponent of the Elevator
+ */
 public class Door {
 
+    /**
+     * Different states for the Door as enum values: DOORS_OPENING, DOORS_OPEN, DOORS_CLOSING, DOORS_CLOSED.
+     */
     public enum DoorStates {
         DOORS_OPENING,
         DOORS_OPEN,
@@ -13,6 +19,9 @@ public class Door {
 
     public Door(){ this.currDoorState = DoorStates.DOORS_CLOSED; }
 
+    /**
+     * Function to change state of doors according to state machine
+     */
     public void operateDoors(){
         switch (currDoorState){
             case DOORS_CLOSED -> currDoorState = DoorStates.DOORS_OPENING;
@@ -21,4 +30,10 @@ public class Door {
             case DOORS_CLOSING -> currDoorState = DoorStates.DOORS_CLOSED;
         }
     }
+
+    /**
+     * Function to access the current state of the Door
+     * @return Current Door state
+     */
+    public DoorStates getCurrDoorState(){ return this.currDoorState; }
 }

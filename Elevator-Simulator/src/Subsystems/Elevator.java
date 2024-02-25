@@ -23,6 +23,14 @@ public class Elevator implements Runnable{
     public Elevator(Scheduler s){
         this.schedulerSystem = s;
         this.currentFloor = 1;
+        elevatorDoors = new Door();
+        elevatorMotor = new Motor();
+
+        elevatorButtons = new ElevatorButton[8];
+        for(int i = 0; i < 8; i++){
+            ElevatorButton newButton = new ElevatorButton(i+1);
+            elevatorButtons[i] = newButton;
+        }
     }
 
     /**
@@ -60,10 +68,11 @@ public class Elevator implements Runnable{
             Event e = schedulerSystem.replyWork();
             System.out.println("Elevator received request from Scheduler from Floor " + e.getFloor() + " to go " + e.getFloorButton() +
                     " to floor " + e.getCarButton() + ".");
-           try{
+
+            try{
                 Thread.sleep(400);
             } catch (InterruptedException ignored) {}
         }
-        System.out.println("elevator done");
+        System.out.println("Elevator done.");
     }
 }

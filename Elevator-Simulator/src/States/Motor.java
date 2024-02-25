@@ -1,8 +1,14 @@
 package States;
 
+/**
+ * Class for the state machine of the Motor subcomponent of the Elevator.
+ */
 public class Motor {
 
-    private enum MotorStates {
+    /**
+     * States for Motor are: IDLE, ACCELERATING, MOVING_AT_MAX_VELOCITY, DECELERATING.
+     */
+    public enum MotorStates {
         IDLE,
         ACCELERATING,
         MOVING_AT_MAX_VELOCITY,
@@ -13,6 +19,9 @@ public class Motor {
 
     public Motor(){ this.currMotorState = MotorStates.IDLE; }
 
+    /**
+     * Changes the state of the motor based on the movement of the Elevator.
+     */
     public void moveElevator(){
         switch (currMotorState){
             case IDLE -> currMotorState = MotorStates.ACCELERATING;
@@ -21,4 +30,10 @@ public class Motor {
             case DECELERATING -> currMotorState = MotorStates.IDLE;
         }
     }
+
+    /**
+     * Gets the current state of the motor.
+     * @return current Motor state.
+     */
+    public MotorStates getCurrMotorState() { return currMotorState; }
 }
