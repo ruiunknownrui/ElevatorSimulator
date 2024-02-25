@@ -24,10 +24,22 @@ public class Door {
      */
     public void operateDoors(){
         switch (currDoorState){
-            case DOORS_CLOSED -> currDoorState = DoorStates.DOORS_OPENING;
-            case DOORS_OPENING -> currDoorState = DoorStates.DOORS_OPEN;
-            case DOORS_OPEN -> currDoorState = DoorStates.DOORS_CLOSING;
-            case DOORS_CLOSING -> currDoorState = DoorStates.DOORS_CLOSED;
+            case DOORS_CLOSED:
+                currDoorState = DoorStates.DOORS_OPENING;
+                System.out.println("Elevator Door State: Doors Opening");
+                break;
+            case DOORS_OPENING:
+                currDoorState = DoorStates.DOORS_OPEN;
+                System.out.println("Elevator Door State: Doors Open");
+                break;
+            case DOORS_OPEN:
+                currDoorState = DoorStates.DOORS_CLOSING;
+                System.out.println("Elevator Door State: Doors Closing");
+                break;
+            case DOORS_CLOSING:
+                currDoorState = DoorStates.DOORS_CLOSED;
+                System.out.println("Elevator Door State: Doors Closed");
+                break;
         }
     }
 

@@ -27,8 +27,14 @@ public class ElevatorButton {
      */
     public void toggleButtonState(){
         switch (currButtonState){
-            case ON -> currButtonState = ButtonStates.OFF;
-            case OFF -> currButtonState = ButtonStates.ON;
+            case ON:
+                currButtonState = ButtonStates.OFF;
+                System.out.println("Elevator Floor Button #" + this.floorNumber + " state: OFF");
+                break;
+            case OFF:
+                currButtonState = ButtonStates.ON;
+                System.out.println("Elevator Floor Button #" + this.floorNumber + " state: ON");
+                break;
         }
     }
 

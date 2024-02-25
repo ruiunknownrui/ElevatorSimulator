@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test class for Motor, exhausts all states for the state machine and asserts with expected value.
  */
-class MotorTest {
+public class MotorTest {
 
     private Motor testMotor = new Motor();
 

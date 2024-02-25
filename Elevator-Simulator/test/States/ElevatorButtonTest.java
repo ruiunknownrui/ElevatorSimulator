@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test class for ElevatorButton, exhausts all states for state machine and asserts with expected values
  */
-class ElevatorButtonTest {
+public class ElevatorButtonTest {
 
     ElevatorButton testButton = new ElevatorButton(1);
     @Test

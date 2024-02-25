@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test class for the Door, exhausts all states of the state machine and asserts current state with expected value.
  */
-class DoorTest {
+public class DoorTest {
 
     private Door testDoors = new Door();
 
