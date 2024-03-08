@@ -1,19 +1,17 @@
-SYSC 3303 Lab Group 4 - Iteration 1
+SYSC 3303 Lab Group 4 - Iteration 2
 
 Contributors:
   Ahmed Moazzam
-  - Setup project structure and created repo.
-  - Created Floor class and Floor tests.
-  - Helped with Scheduler and Elevator classes.
+  - Created Motor, Door, ElevatorButton and corresponding test classes.
   Adam Arrhaoui
-  - Created unit tests structure.
-  - UML and Sequence Diagrams
+  - Created Elevator State Diagram
+  - Help with elevator state
   Rebecca Li
-  - Scheduler class and tests
-  - Helped with Elevator class
+  - SchedulerStateTest and SchedulerState class
+  - Create Scheduler State diagram
   Xianqi Wang
-  - Helped with Elevator class
-  - Debug and documentation of other classes.
+  - Helped with SchedulerState class.
+  - Debug and add scheduler state to the proper place
 
 Files:
   src/:
@@ -26,6 +24,9 @@ Files:
   
   src/States:
   - SchedulerState.java, state machine for scheduler (In Progress)
+  - Door.java, state machine for door.
+  - Motor.java, state machine for moving speed.
+  - ElevatorButton.java, state machine for elevator button
   
   src/Subsystems:  
   - Elevator.java, class for Elevator subsystem
@@ -35,6 +36,12 @@ Files:
 
   test/:
   - TestSuite.java, runs all tests
+
+  test/States:
+  - SchedulerStateTest.java, unit testing class for SchedulerState class.
+  - DoorTest.java, unit testing class for Door class.
+  - MotorTest.java, unit testing class for Motor class.
+  - ElevatorButtonTest.java, unit testing class for ElevatorButton class.
 
   test/Data:
   - EventTest.java, unit testing class for Event class
