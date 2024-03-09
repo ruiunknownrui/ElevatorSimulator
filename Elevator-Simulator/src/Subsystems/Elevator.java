@@ -5,6 +5,9 @@ import States.ElevatorButton;
 import States.Door;
 import States.Motor;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * The Elevator class simulates the behavior of an elevator car subsystem in the Elevator-Simulator project
  */
@@ -15,6 +18,8 @@ public class Elevator implements Runnable{
     private ElevatorButton[] elevatorButtons;
     private Door elevatorDoors;
     private Motor elevatorMotor;
+    private Timer updateTimer;
+    private static final double UPDATE_RATE = (double) 1/30; // Amount of seconds in between each update
 
     /**
      * Create an elevator that receive requests from the Scheduler
@@ -31,6 +36,36 @@ public class Elevator implements Runnable{
             ElevatorButton newButton = new ElevatorButton(i+1);
             elevatorButtons[i] = newButton;
         }
+        startUpdateTimer();
+    }
+
+    /**
+     * Starts the background update timer thread. This thread runs the update function once every UPDATE_RATE seconds
+     */
+    private void startUpdateTimer(){
+        // Create TimerTask that will run once every UPDATE_RATE seconds
+        TimerTask timerTask = new TimerTask() {
+            private static long lastUpdateNanoseconds = System.nanoTime();
+            @Override
+            public void run() {
+                long currTime = System.nanoTime();
+                double elapsedTime = (double) (currTime - lastUpdateNanoseconds) / 1_000_000_000;
+                update(elapsedTime);
+                lastUpdateNanoseconds = currTime;
+            }
+        };
+        updateTimer = new Timer();
+        updateTimer.schedule(timerTask, 0, (long)(UPDATE_RATE * 1000));
+    }
+
+    /**
+     * Update event that is run once every UPDATE_RATE seconds. This is called by the updateTimer
+     * @param deltaT The amount of time elapsed since the last update, in milliseconds
+     */
+    public void update(double deltaT){
+        // can probably call update function to elevators subcomponents like motor/door/button etc.
+        // use deltaT for calculating how far the elevator should move etc
+        System.out.println("Elevator update! Last update was " + deltaT + " seconds ago");
     }
 
     /**
