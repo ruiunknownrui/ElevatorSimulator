@@ -5,6 +5,9 @@ import States.ElevatorButton;
 import States.Door;
 import States.Motor;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -14,6 +17,8 @@ import java.util.TimerTask;
 public class Elevator implements Runnable{
 
     private Scheduler schedulerSystem;
+    private Thread networkHandler;
+    private static int port = 4000; //TODO: Change constructor to use port for network handler instead of directly using scheduler
     private int currentFloor;
     private ElevatorButton[] elevatorButtons;
     private Door elevatorDoors;
@@ -26,6 +31,7 @@ public class Elevator implements Runnable{
      * @param s Scheduler that controls this elevator and sending request
      */
     public Elevator(Scheduler s){
+        //TODO: Change constructor to use port for network handler instead of directly using scheduler
         this.schedulerSystem = s;
         this.currentFloor = 1;
         elevatorDoors = new Door();
@@ -36,6 +42,15 @@ public class Elevator implements Runnable{
             ElevatorButton newButton = new ElevatorButton(i+1);
             elevatorButtons[i] = newButton;
         }
+
+        // setup network handler
+        try {
+            networkHandler = new Thread(new ElevatorNetworkHandler(this, port++));
+        } catch (IOException e){
+            e.printStackTrace();
+            System.exit(1);
+        }
+        networkHandler.start();
         startUpdateTimer();
     }
 
@@ -93,6 +108,23 @@ public class Elevator implements Runnable{
             currentFloor -= 1;
             System.out.println("Elevator moves down to floor " + currentFloor);
         }
+    }
+
+    /**
+     * Proccess request received from a given DatagramPacket
+     * @param requestPacket the DatagramPacket that was received. Should contain request data.
+     */
+    public void receiveRequest(DatagramPacket requestPacket){
+        // Process the received datagram.
+        System.out.println("ElevatorNetworkHandler: Received packet");
+        System.out.println("From host: " + requestPacket.getAddress());
+        System.out.println("Host port: " + requestPacket.getPort());
+        int len = requestPacket.getLength();
+        System.out.println("Length: " + len);
+        System.out.print("Containing: ");
+
+        System.out.println("received message string = " + new String(requestPacket.getData(), requestPacket.getOffset(), len));
+        System.out.println("received message bytes = " + Arrays.toString(requestPacket.getData()));
     }
 
     /**
