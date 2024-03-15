@@ -1,6 +1,8 @@
 package Data;
 
-public class Event {
+import java.io.Serializable;
+
+public class Event implements Serializable {
 
     private String time;
     private int floor;
