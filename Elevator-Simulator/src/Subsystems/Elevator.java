@@ -5,7 +5,9 @@ import States.ElevatorButton;
 import States.Door;
 import States.Motor;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.util.Arrays;
 import java.util.Timer;
@@ -125,6 +127,20 @@ public class Elevator implements Runnable{
 
         System.out.println("received message string = " + new String(requestPacket.getData(), requestPacket.getOffset(), len));
         System.out.println("received message bytes = " + Arrays.toString(requestPacket.getData()));
+
+        try {
+            Event event = getEventFromRequest(requestPacket);
+            System.out.println("Elevator received request from Scheduler from Floor " + event.getFloor() + " to go " + event.getFloorButton() +
+                    " to floor " + event.getCarButton() + ".");
+        } catch (Exception e) {
+
+        }
+    }
+
+    public Event getEventFromRequest (DatagramPacket requestPacket) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(requestPacket.getData(), requestPacket.getOffset(), requestPacket.getLength());
+        ObjectInputStream ois = new ObjectInputStream(bais);
+        return (Event)ois.readObject();
     }
 
     /**
