@@ -20,7 +20,8 @@ public class Elevator implements Runnable{
 
     private Scheduler schedulerSystem;
     private Thread networkHandler;
-    private static int port = 4000; //TODO: Change constructor to use port for network handler instead of directly using scheduler
+    private static int nextPort = 4000; //TODO: Change constructor to use port for network handler instead of directly using scheduler
+    private int port;
     private int currentFloor;
     private ElevatorButton[] elevatorButtons;
     private Door elevatorDoors;
@@ -46,8 +47,9 @@ public class Elevator implements Runnable{
         }
 
         // setup network handler
+        port = nextPort++;
         try {
-            networkHandler = new Thread(new ElevatorNetworkHandler(this, port++));
+            networkHandler = new Thread(new ElevatorNetworkHandler(this, port));
         } catch (IOException e){
             e.printStackTrace();
             System.exit(1);
@@ -92,6 +94,12 @@ public class Elevator implements Runnable{
         return currentFloor;
     }
 
+    /**
+     * @return the elevator's network port
+     */
+    public int getPort(){
+        return port;
+    }
     /**
      * Move the elevator up one floor
      */
