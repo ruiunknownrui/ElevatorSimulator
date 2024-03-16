@@ -1,6 +1,7 @@
 package States;
 
 import Data.Direction;
+import Subsystems.Elevator;
 
 /**
  * Class for the state machine of the Motor subcomponent of the Elevator.
@@ -17,6 +18,7 @@ public class Motor {
         DECELERATING
     }
 
+    private Elevator elevator;
     private MotorStates currMotorState;
     private Direction moveDirection = Direction.Up;
     private static final double FLOOR_HEIGHT = 4D; // 4 meters per floor
@@ -26,7 +28,10 @@ public class Motor {
     private double velocity = 0D;
     private double position = 0D;
 
-    public Motor(){ this.currMotorState = MotorStates.IDLE; }
+    public Motor(Elevator elevator){
+        this.elevator = elevator;
+        this.currMotorState = MotorStates.IDLE;
+    }
 
     // Updates the current motor state
     public void update(double deltaT){

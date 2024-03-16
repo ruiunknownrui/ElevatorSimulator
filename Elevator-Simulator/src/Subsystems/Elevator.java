@@ -38,7 +38,7 @@ public class Elevator implements Runnable{
         this.schedulerSystem = s;
         this.currentFloor = 1;
         elevatorDoors = new Door();
-        elevatorMotor = new Motor();
+        elevatorMotor = new Motor(this);
 
         elevatorButtons = new ElevatorButton[8];
         for(int i = 0; i < 8; i++){
