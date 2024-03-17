@@ -155,15 +155,14 @@ public class Elevator implements Runnable{
      *Run the elevator thread
      */
     public void run(){
-        while (schedulerSystem.keepSending()){
-            Event e = schedulerSystem.replyWork();
-            System.out.println("Elevator received request from Scheduler from Floor " + e.getFloor() + " to go " + e.getFloorButton() +
-                    " to floor " + e.getCarButton() + ".");
+        while (true){
+//            Event e = schedulerSystem.replyWork();
+//            System.out.println("Elevator received request from Scheduler from Floor " + e.getFloor() + " to go " + e.getFloorButton() +
+//                    " to floor " + e.getCarButton() + ".");
 
             try{
                 Thread.sleep(400);
             } catch (InterruptedException ignored) {}
         }
-        System.out.println("Elevator done.");
     }
 }

@@ -1,105 +1,94 @@
 package Subsystems;
 
+import Data.ElevatorInfo;
 import Data.Event;
 import States.SchedulerState;
 
+import java.util.HashMap;
+
 
 /**
- * Scheduler class keep adding requests from floor to the buffer
+ * Scheduler class keep adding requests from floor to the buffer. It creates RequestBuffer, SchedulerReceiveHandler,
+ * SchedulerSendHandler, and SchedulerUpdateHandler.
+ * Scheduler class store the state of scheduler, and elevator information. It also contains the function that
+ * determines the target elevator.
  * @author Rebecca Li
  */
 public class Scheduler implements Runnable{
 
     private RequestBuffer requestBuffer;
-    private static boolean floorDone;
-    private int totalRequest;
-    private int numOfSend;
-    private SchedulerState state;
-
-
+    private SchedulerState.schedulerStates state;
+    private HashMap<Integer, ElevatorInfo> elevatorInfo;
+    private boolean accessInfo;  // use for critical section
+//    private SchedulerReceiveHandler schedulerReceive;
+//    private SchedulerSendHandler schedulerSend;
+//    private SchedulerUpdateHandler schedulerUpdate;
+    private Thread schedulerReceive;
+    private Thread schedulerSend;
+    private Thread schedulerUpdate;
     /**
-     * Scheduler creates an empty event list
-     * @param requestBuffer
+     * Scheduler creates the request buffer and three scheduler handlers which are used to send and receive message
      */
-    public Scheduler(RequestBuffer requestBuffer){
-        this.requestBuffer = requestBuffer;
-        this.state = new SchedulerState();
-        floorDone = false;
-        totalRequest = 0;
-        numOfSend = 0;
-        System.out.println(this.state.toString());
+    public Scheduler(){
+        this.requestBuffer = new RequestBuffer();
+        this.state = SchedulerState.schedulerStates.WaitingState;
+        System.out.println("Scheduler created with state: " + this.state);
+        this.schedulerReceive =new Thread(new SchedulerReceiveHandler(this.requestBuffer, this)) ;
+        this.schedulerSend = new Thread(new SchedulerSendHandler(this.requestBuffer, this));
+        this.schedulerUpdate = new Thread(new SchedulerUpdateHandler(this.requestBuffer, this));
+    }
+
+    public void setState(SchedulerState.schedulerStates newState){
+        this.state = newState;
+        System.out.println("Scheduler State: " + this.state);
+    }
+
+    public synchronized int targetElevator(Event event){
+        int startFloor = event.getFloor();
+        int elevatorKey = -1;
+        int closestFloor = -10;
+        while (accessInfo || elevatorInfo.size() == 0){
+            try{
+                wait();
+            } catch (InterruptedException e){
+                System.err.println(e);
+            }
+        }
+        accessInfo = true;
+        for (var elevator : elevatorInfo.entrySet()){
+            if (closestFloor == -10 ||
+                    (Math.abs(startFloor - closestFloor) >
+                            Math.abs(startFloor - elevator.getValue().getCurrFloor()))){
+                elevatorKey = elevator.getKey();
+                closestFloor = elevator.getValue().getCurrFloor();
+                }
+            }
+        notifyAll();
+        accessInfo = false;
+        return elevatorKey;
+    }
+
+    public synchronized void updateElevatorInfo(int port, ElevatorInfo newInfo){
+        while (accessInfo){
+            try{
+                wait();
+            } catch (InterruptedException e){
+                System.err.println(e);
+            }
+        }
+        accessInfo = true;
+        elevatorInfo.put(port, newInfo);
+        accessInfo = false;
+        notifyAll();
     }
 
     /**
-     * Set the state of variable floorDone when the floor has done its work
-     */
-    public static void floorDone() {
-        floorDone = true;
-    }
-
-    /**
-     * setTotalRequest sets the total number of requests sent from floor
-     * @param numOfTotal  the total number of requests
-     */
-    public void setTotalRequest(int numOfTotal){
-        totalRequest = numOfTotal;
-        System.out.println("total request: " + totalRequest);
-    }
-
-    /**
-     * getTotalRequest returns the total number of requests received from the floor (Only used in Unit Test)
-     * @return  total number of request
-     */
-    public int getTotalRequest(){
-        return totalRequest;
-    }
-
-    /**
-     * keepSending indicate if the thread is good enough to stop
-     * @return   true if floor finish sending all requests and all requests are sent to elevator
-     */
-    public boolean keepSending(){
-        return !(floorDone && totalRequest == numOfSend);
-    }
-
-    /**
-     * addEvent adds event to the event list
-     * @param event
-     */
-    public void addEvent(Event event){
-        if(requestBuffer.getEvents().isEmpty()) state.updateState();
-        requestBuffer.addToEvents(event);
-        System.out.println("Scheduler received request from floor " + event.getFloor() +
-                " to go " + event.getFloorButton() +
-                " to floor " + event.getCarButton() + ".");
-        System.out.println(state.toString());
-    }
-
-    /**
-     * replyWork returns uncompleted work.
-     * @return  Event
-     */
-    public Event replyWork(){
-        numOfSend += 1;
-        Event work = requestBuffer.getNextEvent();  // Get event from the  buffer
-        if(requestBuffer.getEvents().isEmpty()) state.updateState();
-        System.out.println("Scheduler sent work to Elevator " + work.getFloor() +
-                " to go " + work.getFloorButton() + " to floor " + work.getCarButton() + ".");
-        System.out.println(state.toString());
-        return work;
-    }
-
-    /**
-     * Keep adding event in  the list to the buffer
+     * Runs this operation.
      */
     @Override
     public void run() {
-        while (keepSending()){
-            try{
-                Thread.sleep(500);
-            } catch (InterruptedException ignored) {}
-        }
-        state.updateState();
-        System.out.println(state.toString());
+        this.schedulerReceive.start();
+        this.schedulerSend.start();
+        this.schedulerUpdate.start();
     }
 }

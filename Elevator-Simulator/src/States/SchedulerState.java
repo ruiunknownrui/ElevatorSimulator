@@ -8,38 +8,23 @@ public class SchedulerState{
     private schedulerStates currState;  // The state
 
     public enum schedulerStates {
-        NoRequest, HasRequest, RequestSent, RequestFinish
-    }
-
-    public SchedulerState(){
-        this.currState = schedulerStates.NoRequest;
+        ReceiveRequest, RequestSent, WaitingState
     }
 
     /**
      * updateState updates the currState depend on the currState
+     *
+     * @return
      */
-    public void updateState(){
-        switch (currState){
-            case NoRequest -> currState = schedulerStates.HasRequest;
-            case HasRequest -> currState = schedulerStates.RequestSent;
-            case RequestSent -> currState = schedulerStates.RequestFinish;
+    public static schedulerStates updateState(boolean isReceive, boolean isSend){
+        if (isReceive) {
+            return schedulerStates.ReceiveRequest;
+        } else if (isSend) {
+            return schedulerStates.RequestSent;
+        }else {
+            return schedulerStates.WaitingState;
         }
     }
 
-    /**
-     * getCurrState returns the currState. Only used in SchedulerStateTest
-     * @return
-     */
-    public schedulerStates getCurrState(){
-        return currState;
-    }
-
-    /**
-     * toString returns the current state in String
-     * @return
-     */
-    public String toString(){
-        return "Current Scheduler state is " + currState.toString();
-    }
 }
 

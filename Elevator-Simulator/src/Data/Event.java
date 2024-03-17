@@ -31,5 +31,9 @@ public class Event implements Serializable {
     public int getCarButton() {
         return carButton;
     }
+
+    public String toString(){
+        return "Time: " + time + ", Floor: " + floor + ", Floor Button: " + floorButton + ", Car Button: " + carButton;
+    }
 }
 
