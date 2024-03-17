@@ -77,7 +77,6 @@ public class Floor implements Runnable{
         ObjectOutputStream output = new ObjectOutputStream(byteOut);
         output.writeObject(sendEvent);
         byte[] sendMsg = byteOut.toByteArray();
-        System.out.println("send byte: " + sendMsg);
 
         try {
             this.sendPacket = new DatagramPacket(sendMsg, sendMsg.length, InetAddress.getLocalHost(), 3000);

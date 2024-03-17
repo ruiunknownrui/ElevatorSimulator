@@ -33,6 +33,7 @@ public class Scheduler implements Runnable{
         this.requestBuffer = new RequestBuffer();
         this.state = SchedulerState.schedulerStates.WaitingState;
         System.out.println("Scheduler created with state: " + this.state);
+        this.elevatorInfo = new HashMap<>();
         this.schedulerReceive =new Thread(new SchedulerReceiveHandler(this.requestBuffer, this)) ;
         this.schedulerSend = new Thread(new SchedulerSendHandler(this.requestBuffer, this));
         this.schedulerUpdate = new Thread(new SchedulerUpdateHandler(this.requestBuffer, this));

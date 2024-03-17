@@ -42,7 +42,6 @@ public class SchedulerReceiveHandler implements Runnable{
 
         try {
             socket.receive(receivePacket);  // Attempt to receive the acknowledgment
-            System.out.println("receive byte: " + receivePacket.getData());
             sendAcknowledgment(receivePacket);  // Send back acknowledgement
             this.addEventToBuffer(receivePacket);
         } catch (IOException e) {
@@ -53,8 +52,6 @@ public class SchedulerReceiveHandler implements Runnable{
 
     public void addEventToBuffer(DatagramPacket receivePacket) throws IOException, ClassNotFoundException {
       ByteArrayInputStream inputByte = new ByteArrayInputStream(receivePacket.getData());
-      System.out.println("byte: " + receivePacket.getData());
-      System.out.println("offset: " + receivePacket.getOffset());
       ObjectInputStream inputObject = new ObjectInputStream(inputByte);
       Event receivedEvent = (Event) inputObject.readObject();
       System.out.println("Scheduler receive " + receivedEvent.toString());
