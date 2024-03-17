@@ -24,9 +24,12 @@ public class Motor {
     private static final double FLOOR_HEIGHT = 4D; // 4 meters per floor
     private static final double MAX_ACCEL = 0.13D; // m/s^2
     private static final double MAX_VELOCITY = 1.048D; // m/s
+    private static final int MIN_FLOOR = 1;
+    private static final int MAX_FLOOR = 8;
     private double acceleration = 0D;
     private double velocity = 0D;
     private double position = 0D;
+    private int currFloor = MIN_FLOOR;
 
     public Motor(Elevator elevator){
         this.elevator = elevator;
@@ -35,7 +38,63 @@ public class Motor {
 
     // Updates the current motor state
     public void update(double deltaT){
-        
+        switch (currMotorState){
+            case ACCELERATING -> {
+                updateVelocity(acceleration * ((moveDirection == Direction.Up)? 1 : -1), deltaT);
+                updatePosition(velocity, deltaT);
+
+                //TODO change state if elevator reached or is reaching target floor, and if elevator reached top/bottom floor
+            }
+        }
+
+    }
+
+
+    private void updateVelocity(double accel, double deltaT){
+        velocity += accel * deltaT; // Accel negative if moving down, positive otherwise
+        if (Math.abs(velocity) >= MAX_VELOCITY) {
+            // set to max velocity, with proper sign
+            velocity = MAX_VELOCITY * ((velocity < 0)? -1 : 1);
+        }
+    }
+
+    private void updatePosition(double vel, double deltaT) {
+        position += vel * deltaT;
+        // check if new floor threshold reached
+        double currFloorPosition = currFloor * FLOOR_HEIGHT;
+        if (vel < 0){
+            // If moving down, don't change floor number until 4 meters below current floor's position
+            if (position <= currFloorPosition - FLOOR_HEIGHT){
+                newFloorReached();
+            }
+        } else {
+            // If moving up, don't change floor number until 4 meters above current floor's position
+            if (position >= currFloorPosition + FLOOR_HEIGHT){
+                newFloorReached();
+            }
+        }
+
+    }
+
+    /**
+     * Event that gets called when the elevator has reached a new floor while travelling.
+     * Updates currFloor up or down depending on current movement direction,
+     * then sends appropriate signal to elevator (moveUp or moveDown)
+     */
+    public void newFloorReached(){
+        int newFloorNum;
+        if (moveDirection == Direction.Up){
+            // move floor up
+            newFloorNum = currFloor + 1;
+            assert(newFloorNum <= MAX_FLOOR);
+            elevator.moveUp();
+        } else {
+            // move floor down
+            newFloorNum = currFloor - 1;
+            assert(newFloorNum >= MIN_FLOOR);
+            elevator.moveDown();
+        }
+        currFloor = newFloorNum;
     }
     /**
      * Changes the state of the motor based on the movement of the Elevator.
