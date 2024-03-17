@@ -5,6 +5,7 @@ Contributors:
   - Help with elevator
   Adam Arrhaoui
   - Help with elevator receiving network and object to byte convert
+  - update elevator movement
   Rebecca Li
   - update Scheduler, SchedulerState, SchedulerTest, SchedulerStateTest
   - Created Ack, ElevatorInfo, SchedulerReceiveHandler, SchedulerSendHandler, SchedulerUpdateHandler
