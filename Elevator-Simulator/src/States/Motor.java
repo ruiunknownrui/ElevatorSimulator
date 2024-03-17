@@ -36,44 +36,89 @@ public class Motor {
         this.currMotorState = MotorStates.IDLE;
     }
 
-    // Updates the current motor state
+    /**
+     * Updates elevator motors acceleration, velocity, and position based on currMotorState,
+     * and changes to new states accordingly
+     * @param deltaT seconds since last update, used to calculate kinematics
+     */
     public void update(double deltaT){
         switch (currMotorState){
             case ACCELERATING -> {
+                acceleration = MAX_ACCEL;
                 updateVelocity(acceleration * ((moveDirection == Direction.Up)? 1 : -1), deltaT);
+                if (Math.abs(velocity) == MAX_VELOCITY){
+                    currMotorState = MotorStates.MOVING_AT_MAX_VELOCITY;
+                }
                 updatePosition(velocity, deltaT);
-
-                //TODO change state if elevator reached or is reaching target floor, and if elevator reached top/bottom floor
+            }
+            case DECELERATING -> {
+                acceleration = -MAX_ACCEL;
+                updateVelocity(acceleration * ((moveDirection == Direction.Up)? 1 : -1), deltaT);
+                if (velocity == 0) {
+                    // Finished slowing down
+                    currMotorState = MotorStates.IDLE;
+                }
+                updatePosition(velocity, deltaT);
+            }
+            case MOVING_AT_MAX_VELOCITY -> {
+                updatePosition(velocity, deltaT);
+            }
+            case IDLE -> {
+                acceleration = 0;
+                velocity = 0;
             }
         }
-
     }
 
-
+    /**
+     * Updates elevators velocity based on given acceleration value and deltaT.
+     * If the given acceleration is slowing down relative to the current velocity and movement direction, it will automatically
+     * clamp the velocity to 0m/s to ensure the elevator doesn't start moving backwards.
+     * @param accel elevator acceleration in m/s. Positive is accelerating/decelerating up, negative is accel/decel down
+     * @param deltaT seconds elapsed since last update
+     */
     private void updateVelocity(double accel, double deltaT){
         velocity += accel * deltaT; // Accel negative if moving down, positive otherwise
+        // Make sure velocity isn't negative if elevator is moving up, and vice versa
+        // This is to ensure the elevator velocity snaps to 0 when decelerating
+        if ((moveDirection == Direction.Up && accel < 0 && velocity < 0) || (moveDirection == Direction.Down && accel > 0 && velocity > 0)){
+            velocity = 0;
+        }
         if (Math.abs(velocity) >= MAX_VELOCITY) {
             // set to max velocity, with proper sign
             velocity = MAX_VELOCITY * ((velocity < 0)? -1 : 1);
         }
     }
 
+    /**
+     * Updates elevators position based on given velocity value and deltaT.
+     * If the given velocity is 0, will snap position to nearest floor.
+     * When the elevator reaches a new floor, will call newFloorReached() event.
+     * @param vel elevator velocity in m/s. Positive is moving up, negative is moving down
+     * @param deltaT seconds elapsed since last update
+     */
     private void updatePosition(double vel, double deltaT) {
         position += vel * deltaT;
         // check if new floor threshold reached
-        double currFloorPosition = currFloor * FLOOR_HEIGHT;
+        double currFloorPosition = (currFloor - MIN_FLOOR) * FLOOR_HEIGHT;
         if (vel < 0){
             // If moving down, don't change floor number until 4 meters below current floor's position
             if (position <= currFloorPosition - FLOOR_HEIGHT){
                 newFloorReached();
             }
-        } else {
+        } else if (vel > 0) {
             // If moving up, don't change floor number until 4 meters above current floor's position
             if (position >= currFloorPosition + FLOOR_HEIGHT){
                 newFloorReached();
             }
+        } else {
+            // Velocity is 0, snap to nearest floor position
+            int nearestFloor = MIN_FLOOR + (int)Math.round(position / FLOOR_HEIGHT);
+            if (nearestFloor != currFloor){
+                newFloorReached();
+                position = (currFloor - MIN_FLOOR) * FLOOR_HEIGHT;
+            }
         }
-
     }
 
     /**
