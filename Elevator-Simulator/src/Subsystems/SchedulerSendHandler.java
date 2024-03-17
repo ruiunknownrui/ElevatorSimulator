@@ -23,6 +23,11 @@ public class SchedulerSendHandler implements Runnable{
     private DatagramSocket socket;  // DatagramSocket which is used to receive and send
     private final int port = 3001;
 
+    /**
+     * initialize the buffer, the scheduler, and the socket
+     * @param buffer  the request buffer
+     * @param scheduler  the scheduler
+     */
     public SchedulerSendHandler(RequestBuffer buffer, Scheduler scheduler){
         this.buffer = buffer;
         this.scheduler = scheduler;
@@ -36,7 +41,7 @@ public class SchedulerSendHandler implements Runnable{
     }
 
     /**
-     * Sends a message to the specific elevator and receive acknowledge
+     * Sends request event to the specific elevator and receive acknowledge
      */
     public void sendAndReceive() throws IOException {
         Event sendEvent = this.buffer.getNextEvent();  // Get event from the buffer

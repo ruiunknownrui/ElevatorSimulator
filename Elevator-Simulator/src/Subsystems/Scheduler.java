@@ -20,14 +20,13 @@ public class Scheduler implements Runnable{
     private SchedulerState.schedulerStates state;
     private HashMap<Integer, ElevatorInfo> elevatorInfo;
     private boolean accessInfo;  // use for critical section
-//    private SchedulerReceiveHandler schedulerReceive;
-//    private SchedulerSendHandler schedulerSend;
-//    private SchedulerUpdateHandler schedulerUpdate;
     private Thread schedulerReceive;
     private Thread schedulerSend;
     private Thread schedulerUpdate;
+
     /**
      * Scheduler creates the request buffer and three scheduler handlers which are used to send and receive message
+     * it also initialize the elevator information HashMap and scheduler state.
      */
     public Scheduler(){
         this.requestBuffer = new RequestBuffer();
@@ -36,19 +35,38 @@ public class Scheduler implements Runnable{
         this.elevatorInfo = new HashMap<>();
         this.schedulerReceive =new Thread(new SchedulerReceiveHandler(this.requestBuffer, this)) ;
         this.schedulerSend = new Thread(new SchedulerSendHandler(this.requestBuffer, this));
-        this.schedulerUpdate = new Thread(new SchedulerUpdateHandler(this.requestBuffer, this));
+        this.schedulerUpdate = new Thread(new SchedulerUpdateHandler(this));
     }
 
+    /**
+     * setState sets the new state to the scheduler
+     * @param newState  new scheduler state
+     */
     public void setState(SchedulerState.schedulerStates newState){
         this.state = newState;
         System.out.println("Scheduler State: " + this.state);
     }
 
+    /**
+     * getState returns the state of the scheduler  (only used in test)
+     * @return  current state of the Scheduler
+     */
+    public SchedulerState.schedulerStates getState(){
+        return this.state ;
+    }
+
+    /**
+     * targetElevator determine the elevator which should receive the current request.
+     * the elevator which located closest to the target floor will receive the request
+     * @param event  current request
+     * @return
+     */
     public synchronized int targetElevator(Event event){
+        //TODO: change the logic
         int startFloor = event.getFloor();
         int elevatorKey = -1;
         int closestFloor = -10;
-        while (accessInfo || elevatorInfo.size() == 0){
+        while (accessInfo || elevatorInfo.isEmpty()){
             try{
                 wait();
             } catch (InterruptedException e){
@@ -56,6 +74,7 @@ public class Scheduler implements Runnable{
             }
         }
         accessInfo = true;
+        // keep finding the elevator which is closest to the start floor
         for (var elevator : elevatorInfo.entrySet()){
             if (closestFloor == -10 ||
                     (Math.abs(startFloor - closestFloor) >
@@ -69,6 +88,11 @@ public class Scheduler implements Runnable{
         return elevatorKey;
     }
 
+    /**
+     * updateElevatorInfo updates assign the new elevator information to the specific key
+     * @param port
+     * @param newInfo
+     */
     public synchronized void updateElevatorInfo(int port, ElevatorInfo newInfo){
         while (accessInfo){
             try{

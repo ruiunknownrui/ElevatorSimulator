@@ -17,7 +17,6 @@ import java.net.SocketException;
  */
 public class SchedulerUpdateHandler implements Runnable{
 
-    private RequestBuffer buffer;
     private Scheduler scheduler;
 
     private DatagramPacket ackPacket;  // Datagram packet for sending acknowledge to floor
@@ -26,8 +25,11 @@ public class SchedulerUpdateHandler implements Runnable{
     private DatagramSocket socket;  // DatagramSocket which is used to receive and send
     private final int port = 3002;
 
-    public SchedulerUpdateHandler(RequestBuffer buffer, Scheduler scheduler){
-        this.buffer = buffer;
+    /**
+     * initialize the scheduler and socket
+     * @param scheduler
+     */
+    public SchedulerUpdateHandler(Scheduler scheduler){
         this.scheduler = scheduler;
         try {
             this.socket = new DatagramSocket(this.port);  // Create Socket
@@ -38,6 +40,11 @@ public class SchedulerUpdateHandler implements Runnable{
         }
     }
 
+    /**
+     * receiveInfo received the elevator information from all elevators
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public void receiveInfo() throws IOException, ClassNotFoundException {
         byte[] receive = new byte[1000];
         receivePacket = new DatagramPacket(receive, receive.length);
@@ -53,6 +60,12 @@ public class SchedulerUpdateHandler implements Runnable{
 
     }
 
+    /**
+     * updateInfo calls function in scheduler to update the specific elevator's information
+     * @param receivePacket  the received DatagramPacket
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public void updateInfo(DatagramPacket receivePacket) throws IOException, ClassNotFoundException {
         ByteArrayInputStream inputByte = new ByteArrayInputStream(receivePacket.getData());
         ObjectInputStream inputObject = new ObjectInputStream(inputByte);
@@ -61,6 +74,11 @@ public class SchedulerUpdateHandler implements Runnable{
         this.scheduler.updateElevatorInfo(receivePacket.getPort(), receivedInfo);
     }
 
+    /**
+     * sendAcknowledgment creates and sends the acknowledgment to the specific elevator
+     * @param receivedPacket  the received DatagramPacket
+     * @throws IOException
+     */
     public void sendAcknowledgment(DatagramPacket receivedPacket) throws IOException {
         Ack newAck = new Ack("Receive updated info from Elevator");
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();

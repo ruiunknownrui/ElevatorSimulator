@@ -24,6 +24,11 @@ public class SchedulerReceiveHandler implements Runnable{
     private DatagramSocket socket;  // DatagramSocket which is used to receive and send
     private final int port = 3000;
 
+    /**
+     * Initialize the buffer, the scheduler, and the socket which is used to send and receive message
+     * @param buffer  the request buffer
+     * @param scheduler  the scheduler
+     */
     public SchedulerReceiveHandler(RequestBuffer buffer, Scheduler scheduler){
         this.buffer = buffer;
         this.scheduler = scheduler;
@@ -36,6 +41,11 @@ public class SchedulerReceiveHandler implements Runnable{
         }
     }
 
+    /**
+     * receiveRequest receives request from floor
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public void receiveRequest() throws IOException, ClassNotFoundException {
         byte[] receive = new byte[1000];
         receivePacket = new DatagramPacket(receive, receive.length);
@@ -50,6 +60,12 @@ public class SchedulerReceiveHandler implements Runnable{
         }
     }
 
+    /**
+     * addEventToBuffer adds the received event to the request buffer
+     * @param receivePacket  the received DatagramPacket
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public void addEventToBuffer(DatagramPacket receivePacket) throws IOException, ClassNotFoundException {
       ByteArrayInputStream inputByte = new ByteArrayInputStream(receivePacket.getData());
       ObjectInputStream inputObject = new ObjectInputStream(inputByte);
@@ -59,13 +75,17 @@ public class SchedulerReceiveHandler implements Runnable{
       this.scheduler.setState(SchedulerState.updateState(true, false));
     }
 
+    /**
+     * sendAcknowledgement creates and sends teh acknowledgement to the floor
+     * @param receivedPacket  the received DatagramPacket
+     * @throws IOException
+     */
     public void sendAcknowledgment(DatagramPacket receivedPacket) throws IOException {
         Ack newAck = new Ack("Receive request from floor");
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         ObjectOutputStream output = new ObjectOutputStream(byteOut);
         output.writeObject(newAck);
         byte[] ackByte = byteOut.toByteArray();
-        System.out.println("ack byte: " + ackByte);
         ackPacket = new DatagramPacket(ackByte, ackByte.length, receivedPacket.getAddress(), receivedPacket.getPort());
         try{
             this.socket.send(ackPacket);
