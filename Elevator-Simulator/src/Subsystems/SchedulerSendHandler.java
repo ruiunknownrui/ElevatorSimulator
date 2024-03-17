@@ -50,7 +50,7 @@ public class SchedulerSendHandler implements Runnable{
         try {
             this.sendPacket = new DatagramPacket(sendMsg, sendMsg.length, InetAddress.getLocalHost(), target);
             // Initialize receivePacket before using it
-            byte receiveData[] = new byte[100];
+            byte receiveData[] = new byte[1000];
             this.receivePacket = new DatagramPacket(receiveData, receiveData.length);
         } catch (UnknownHostException e) {
             e.printStackTrace();

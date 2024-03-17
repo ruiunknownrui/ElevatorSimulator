@@ -1,10 +1,12 @@
 package Subsystems;
 
+import Data.Ack;
 import Data.Direction;
 import Data.Event;
+import States.SchedulerState;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -14,10 +16,20 @@ import java.util.Scanner;
  */
 public class Floor implements Runnable{
 
-    private Scheduler schedulerSystem;
+//    private Scheduler schedulerSystem;
+    private DatagramPacket sendPacket;  // Datagram packet for sending request to scheduler
 
-    public Floor(Scheduler schedulerSystem){
-        this.schedulerSystem = schedulerSystem;
+    private DatagramPacket receivePacket;  // Datagram packet for receiving acknowledge from scheduler
+    private DatagramSocket socket;  // DatagramSocket which is used to receive and send
+    private final int port = 2000;
+    public Floor(){
+        try {
+            this.socket = new DatagramSocket(this.port);  // Create Socket
+//            this.socket.setSoTimeout(3000); // Set time out to 3000 milliseconds
+        } catch (SocketException se) {
+            se.printStackTrace();
+            System.exit(1);
+        }
     }
 
     /**
@@ -57,6 +69,86 @@ public class Floor implements Runnable{
     }
 
     /**
+     * Sends a message to the scheduler and receive acknowledge
+     */
+    public void sendAndReceive(Event sendEvent) throws IOException{
+
+        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+        ObjectOutputStream output = new ObjectOutputStream(byteOut);
+        output.writeObject(sendEvent);
+        byte[] sendMsg = byteOut.toByteArray();
+        System.out.println("send byte: " + sendMsg);
+
+        try {
+            this.sendPacket = new DatagramPacket(sendMsg, sendMsg.length, InetAddress.getLocalHost(), 3000);
+            // Initialize receivePacket before using it
+            byte receiveData[] = new byte[1000];
+            this.receivePacket = new DatagramPacket(receiveData, receiveData.length);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        // Perform sending and receiving with timeout handling
+        int attempt = 0;
+        boolean receivedResponse = false;
+
+        while (attempt < 3 && !receivedResponse) { // Retry up to 3 times
+            System.out.println(Thread.currentThread().getName() + ": Attempt " + (attempt + 1));
+            rpc_send(sendPacket);
+
+            try {
+                this.socket.receive(receivePacket);  // Attempt to receive the acknowledgment
+                this.handleAcknowledgment(receivePacket);  // Handle the acknowledgment
+                receivedResponse = true;
+            } catch (SocketTimeoutException ste) {
+                // Handle timeout exception
+                System.out.println(Thread.currentThread().getName() + ": Timeout. Resending packet.");
+                attempt++;
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        if (!receivedResponse) {
+            System.out.println(Thread.currentThread().getName() + ": No response after multiple attempts. Exiting.");
+            return;
+        }
+
+    }
+
+    /**
+     * Handles an acknowledgment packet received from the server.
+     *
+     * @param receivePacket The DatagramPacket containing the acknowledgment received from the server.
+     */
+    private void handleAcknowledgment(DatagramPacket receivePacket) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream inputByte = new ByteArrayInputStream(receivePacket.getData());
+        ObjectInputStream inputObject = new ObjectInputStream(inputByte);
+        Ack receivedEvent = (Ack)inputObject.readObject();
+        System.out.println("Floor receive: " + receivedEvent.getAck());
+    }
+
+
+    /**
+     * Sends a request packet to the server and receives the response packet.
+     *
+     * @param request  the DatagramPacket representing the request.
+     */
+    public void rpc_send(DatagramPacket request) {
+        try {
+            this.socket.send(request);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        System.out.println(Thread.currentThread().getName() + ": Packet sent.\n");
+    }
+
+    /**
      * Name: run()
      * Purpose: Run function for Floor thread. Loops through list of events read from input file and passes
      *          each one to the scheduler thread.
@@ -65,18 +157,23 @@ public class Floor implements Runnable{
      */
     public void run(){
         ArrayList<Event> eventsInput = readInput();
-        int totalRequest = 0;
         for (Event event : eventsInput) {
-            totalRequest += 1;
-            System.out.println("Floor sends request to Scheduler " + event.getFloor() +
-                    " to go " + event.getFloorButton() + " to floor " + event.getCarButton() + ".");
-            schedulerSystem.addEvent(event);  // Sends request to scheduler system
+            try {
+                this.sendAndReceive(event);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             try{
                 Thread.sleep(300);
             } catch (InterruptedException e) { return; }
         }
-        schedulerSystem.setTotalRequest(totalRequest);
-        Scheduler.floorDone();
-        System.out.println("floor done");
+    }
+
+    public static void main(String[] args) {
+        Thread floor;
+
+        floor = new Thread( new Floor());
+
+        floor.start();
     }
 }

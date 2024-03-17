@@ -12,11 +12,11 @@ public class Main {
 
         Scheduler scheduler = new Scheduler();
         schedulerThread = new Thread(scheduler);
-        floor = new Thread( new Floor(scheduler));
-        elevator = new Thread( new Elevator(scheduler));
+        floor = new Thread( new Floor());
+//        elevator = new Thread( new Elevator(scheduler));
 
         schedulerThread.start();
         floor.start();
-        elevator.start();
+//        elevator.start();
     }
 }

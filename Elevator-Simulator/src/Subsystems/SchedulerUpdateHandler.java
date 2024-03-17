@@ -31,7 +31,7 @@ public class SchedulerUpdateHandler implements Runnable{
         this.scheduler = scheduler;
         try {
             this.socket = new DatagramSocket(this.port);  // Create Socket
-            this.socket.setSoTimeout(3000); // Set time out to 3000 milliseconds
+//            this.socket.setSoTimeout(); // Set time out to 3000 milliseconds
         } catch (SocketException se) {
             se.printStackTrace();
             System.exit(1);
@@ -39,7 +39,7 @@ public class SchedulerUpdateHandler implements Runnable{
     }
 
     public void receiveInfo() throws IOException, ClassNotFoundException {
-        byte[] receive = new byte[100];
+        byte[] receive = new byte[1000];
         receivePacket = new DatagramPacket(receive, receive.length);
 
         try {
@@ -85,7 +85,7 @@ public class SchedulerUpdateHandler implements Runnable{
     public void run() {
         while (true){
             try {
-                receiveInfo();
+                this.receiveInfo();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } catch (ClassNotFoundException e) {

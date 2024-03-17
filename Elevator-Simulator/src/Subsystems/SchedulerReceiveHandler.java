@@ -29,7 +29,7 @@ public class SchedulerReceiveHandler implements Runnable{
         this.scheduler = scheduler;
         try {
             this.socket = new DatagramSocket(this.port);  // Create Socket
-            this.socket.setSoTimeout(3000); // Set time out to 3000 milliseconds
+//            this.socket.setSoTimeout(); // Set time out to 3000 milliseconds
         } catch (SocketException se) {
             se.printStackTrace();
             System.exit(1);
@@ -37,27 +37,29 @@ public class SchedulerReceiveHandler implements Runnable{
     }
 
     public void receiveRequest() throws IOException, ClassNotFoundException {
-        byte[] receive = new byte[100];
+        byte[] receive = new byte[1000];
         receivePacket = new DatagramPacket(receive, receive.length);
 
         try {
             socket.receive(receivePacket);  // Attempt to receive the acknowledgment
+            System.out.println("receive byte: " + receivePacket.getData());
             sendAcknowledgment(receivePacket);  // Send back acknowledgement
+            this.addEventToBuffer(receivePacket);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
-        this.addEventToBuffer(receivePacket);
-
     }
 
     public void addEventToBuffer(DatagramPacket receivePacket) throws IOException, ClassNotFoundException {
-        ByteArrayInputStream inputByte = new ByteArrayInputStream(receivePacket.getData());
-        ObjectInputStream inputObject = new ObjectInputStream(inputByte);
-        Event receivedEvent = (Event)inputObject.readObject();
-        System.out.println("Scheduler receive " + receivedEvent.toString());
-        this.buffer.addToEvents(receivedEvent);
-        this.scheduler.setState(SchedulerState.updateState(true, false));
+      ByteArrayInputStream inputByte = new ByteArrayInputStream(receivePacket.getData());
+      System.out.println("byte: " + receivePacket.getData());
+      System.out.println("offset: " + receivePacket.getOffset());
+      ObjectInputStream inputObject = new ObjectInputStream(inputByte);
+      Event receivedEvent = (Event) inputObject.readObject();
+      System.out.println("Scheduler receive " + receivedEvent.toString());
+      this.buffer.addToEvents(receivedEvent);
+      this.scheduler.setState(SchedulerState.updateState(true, false));
     }
 
     public void sendAcknowledgment(DatagramPacket receivedPacket) throws IOException {
@@ -66,7 +68,7 @@ public class SchedulerReceiveHandler implements Runnable{
         ObjectOutputStream output = new ObjectOutputStream(byteOut);
         output.writeObject(newAck);
         byte[] ackByte = byteOut.toByteArray();
-
+        System.out.println("ack byte: " + ackByte);
         ackPacket = new DatagramPacket(ackByte, ackByte.length, receivedPacket.getAddress(), receivedPacket.getPort());
         try{
             this.socket.send(ackPacket);
@@ -84,7 +86,7 @@ public class SchedulerReceiveHandler implements Runnable{
     public void run() {
         while(true){
             try {
-                receiveRequest();
+                this.receiveRequest();
             } catch (IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
