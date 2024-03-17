@@ -1,26 +1,28 @@
-SYSC 3303 Lab Group 4 - Iteration 2
+SYSC 3303 Lab Group 4 - Iteration 3
 
 Contributors:
   Ahmed Moazzam
-  - Created Motor, Door, ElevatorButton and corresponding test classes.
+  - Help with elevator
   Adam Arrhaoui
-  - Created Elevator State Diagram
-  - Help with elevator state
+  - Help with elevator receiving network and object to byte convert
   Rebecca Li
-  - SchedulerStateTest and SchedulerState class
-  - Create Scheduler State diagram
+  - update Scheduler, SchedulerState, SchedulerTest, SchedulerStateTest
+  - Created Ack, ElevatorInfo, SchedulerReceiveHandler, SchedulerSendHandler, SchedulerUpdateHandler
+  - Implemented RPC in Floor
+  - Updated README
   Xianqi Wang
-  - Helped with SchedulerState class.
-  - Debug and add scheduler state to the proper place
+  -
 
 Files:
   src/:
-  - Main.java, main function where threads are created and ran.
+  - Main.java, main function where threads are created and ran.  - not used in this iteration
   - input.txt, input file with data.
   
   src/Data:
   - Direction.java, enum class for Direction
   - Event.java, data class for Events
+  - Ack.java, data class for acknowledgment message
+  - ElevatorInfo.java, data class used for updating current elevator floor to scheduler
   
   src/States:
   - SchedulerState.java, state machine for scheduler (In Progress)
@@ -30,9 +32,14 @@ Files:
   
   src/Subsystems:  
   - Elevator.java, class for Elevator subsystem
+  - ElevatorNetworkHandler.java, class for Elevator to send and receive request
   - Floor.java, class for Floor subsystem
   - Scheduler.java, class for Scheduler subsystem
+  - SchedulerReceiveHandler.java, class for Scheduler to receive request from floor
+  - SchedulerSendHandler.java, class for Scheduler to send request to elevators
+  - SchedulerUpdateHandler.java, class for Scheduler to received the elevator's updated location.
   - RequestBuffer.java, class for thread-safe buffer used by Scheduler
+
 
   test/:
   - TestSuite.java, runs all tests
@@ -52,7 +59,7 @@ Files:
   - SchedulerTests.java, unit tests for Scheduler class
 
 Instructions:
-  After downlading the project and opening in IntelliJ, simply run the main function in Main.java.
+  After downlading the project and opening in IntelliJ, first run Scheduler, then run Floor and Elevator
   You may get a file not found error, if so open the Floor class and change the file path for the
   input file to the actual path of the file on your machine, you can find this path by right 
   clicking on the input.txt file in the Intellij file explorer then 'Copy Path/Reference'/'Path from Content Root'.
