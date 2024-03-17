@@ -13,13 +13,8 @@ public class SchedulerStateTest {
      */
     @Test
     void testUpdateState(){
-        SchedulerState state = new SchedulerState();
-        assertEquals(SchedulerState.schedulerStates.NoRequest, state.getCurrState());
-        state.updateState();
-        assertEquals(SchedulerState.schedulerStates.HasRequest, state.getCurrState());
-        state.updateState();
-        assertEquals(SchedulerState.schedulerStates.RequestSent, state.getCurrState());
-        state.updateState();
-        assertEquals(SchedulerState.schedulerStates.RequestFinish, state.getCurrState());
+        assertEquals(SchedulerState.schedulerStates.RequestSent, SchedulerState.updateState(false, true));
+        assertEquals(SchedulerState.schedulerStates.ReceiveRequest, SchedulerState.updateState(true, false));
+        assertEquals(SchedulerState.schedulerStates.WaitingState, SchedulerState.updateState(false, false));
     }
 }

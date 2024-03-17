@@ -31,5 +31,13 @@ public class Event implements Serializable {
     public int getCarButton() {
         return carButton;
     }
+
+    /**
+     * toString returns the string format information of the object
+     * @return  the information of the object
+     */
+    public String toString(){
+        return "Time: " + time + ", Floor: " + floor + ", Floor Button: " + floorButton + ", Car Button: " + carButton;
+    }
 }
 

@@ -21,7 +21,7 @@ public class FloorTest {
     @Test
     void testReadInput() {
 
-        Floor testFloor = new Floor(new Scheduler(new RequestBuffer()));
+        Floor testFloor = new Floor();
         ArrayList<Event> realList = testFloor.readInput();
 
         ArrayList<Event> testList = new ArrayList<>();
