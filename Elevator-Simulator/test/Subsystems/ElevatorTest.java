@@ -11,7 +11,7 @@ public class ElevatorTest {
     @BeforeEach
     void setUp() {
         scheduler = new Scheduler(); // Modify as needed based on actual constructors.
-        elevator = new Elevator(scheduler);
+        elevator = new Elevator(4000);
     }
 
     @Test
