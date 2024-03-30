@@ -25,7 +25,7 @@ public class Floor implements Runnable{
     public Floor(){
         try {
             this.socket = new DatagramSocket(this.port);  // Create Socket
-//            this.socket.setSoTimeout(3000); // Set time out to 3000 milliseconds
+            this.socket.setSoTimeout(3000); // Set time out to 2 seconds
         } catch (SocketException se) {
             se.printStackTrace();
             System.exit(1);
@@ -89,11 +89,12 @@ public class Floor implements Runnable{
         }
 
         // Perform sending and receiving with timeout handling
-        int attempt = 0;
+        int attempt = 1;
         boolean receivedResponse = false;
 
-        while (attempt < 3 && !receivedResponse) { // Retry up to 3 times
-            System.out.println(Thread.currentThread().getName() + ": Attempt " + (attempt + 1));
+        while (!receivedResponse) { // Retry up to 3 times
+            System.out.println(Thread.currentThread().getName() + ": Attempt " + (attempt) +
+                    "  Sending - " + sendEvent.toString());
             rpc_send(sendPacket);
 
             try {
@@ -102,7 +103,7 @@ public class Floor implements Runnable{
                 receivedResponse = true;
             } catch (SocketTimeoutException ste) {
                 // Handle timeout exception
-                System.out.println(Thread.currentThread().getName() + ": Timeout. Resending packet.");
+//                System.out.println(Thread.currentThread().getName() + ": Timeout. Resending packet.");
                 attempt++;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -111,12 +112,6 @@ public class Floor implements Runnable{
                 throw new RuntimeException(e);
             }
         }
-
-        if (!receivedResponse) {
-            System.out.println(Thread.currentThread().getName() + ": No response after multiple attempts. Exiting.");
-            return;
-        }
-
     }
 
     /**

@@ -2,7 +2,6 @@ package Subsystems;
 
 import Data.Ack;
 import Data.Event;
-import States.SchedulerState;
 
 import java.io.*;
 import java.net.DatagramPacket;
@@ -25,7 +24,8 @@ public class ElevatorNetworkHandler implements Runnable{
         this.elevator = elevator;
         this.port = port;
         this.socket = new DatagramSocket(port);
-        System.out.println("port in network: " + port);
+//        this.socket.setSoTimeout(2000);  // Set timeout to 2 second
+//        System.out.println("port in network: " + port);
     }
 
     /**
@@ -39,8 +39,9 @@ public class ElevatorNetworkHandler implements Runnable{
 
         try {
             socket.receive(receivePacket);  // Attempt to receive the acknowledgment
-            sendAcknowledgment(receivePacket);  // Send back acknowledgement
-            this.addEvent(receivePacket);
+            Event receivedEvent = this.getReceiveObject(receivePacket);
+            this.elevator.updateRequest(receivedEvent);  // update request
+            this.sendAcknowledgment(receivePacket, receivedEvent);  // Send back acknowledgement
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -48,17 +49,17 @@ public class ElevatorNetworkHandler implements Runnable{
     }
 
     /**
-     * addEventToBuffer sets the received event to the elevator
+     * Return the received information in Event form from received DatagramPacket
      * @param receivePacket  the received DatagramPacket
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    public void addEvent(DatagramPacket receivePacket) throws IOException, ClassNotFoundException {
+    public Event getReceiveObject(DatagramPacket receivePacket) throws IOException, ClassNotFoundException {
         ByteArrayInputStream inputByte = new ByteArrayInputStream(receivePacket.getData());
         ObjectInputStream inputObject = new ObjectInputStream(inputByte);
         Event receivedEvent = (Event) inputObject.readObject();
         System.out.println("Elevator " + port + " receive: " + receivedEvent.toString());
-        this.elevator.updateRequest(receivedEvent);
+        return receivedEvent;
     }
 
     /**
@@ -66,8 +67,8 @@ public class ElevatorNetworkHandler implements Runnable{
      * @param receivedPacket  the received DatagramPacket
      * @throws IOException
      */
-    public void sendAcknowledgment(DatagramPacket receivedPacket) throws IOException {
-        Ack newAck = new Ack("Receive request from scheduler");
+    public void sendAcknowledgment(DatagramPacket receivedPacket, Event receivedEvent) throws IOException {
+        Ack newAck = new Ack("Receive request from scheduler - " + receivedEvent.toString());
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         ObjectOutputStream output = new ObjectOutputStream(byteOut);
         output.writeObject(newAck);
@@ -95,19 +96,4 @@ public class ElevatorNetworkHandler implements Runnable{
             }
         }
     }
-//    public void run(){
-//        while (true){
-//            // prepare to receive request
-//            byte[] receivedData = new byte[1000];
-//            DatagramPacket receivePacket = new DatagramPacket(receivedData, receivedData.length);
-//
-//            try {
-//                socket.receive(receivePacket);
-//            } catch (IOException e){
-//                e.printStackTrace();
-//                System.exit(1);
-//            }
-//            elevator.receiveRequest(receivePacket);
-//        }
-//    }
 }

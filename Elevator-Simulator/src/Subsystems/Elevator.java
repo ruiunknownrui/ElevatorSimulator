@@ -18,17 +18,15 @@ import java.util.TimerTask;
  */
 public class Elevator implements Runnable{
 
-    private Scheduler schedulerSystem;
+
     private Thread networkHandler;
-    private static int nextPort = 4000; //TODO: Change constructor to use port for network handler instead of directly using scheduler
-    private int port;
+    private DatagramSocket updateSocket;  // The socket only used to update the elevator arrival information
     private int currentFloor;
     private int targetFloor;  // destination of the request
     private int nextFloor;  // start floor of the request
     private DatagramPacket sendPacket;
     private DatagramPacket receivePacket;
     private boolean hasRequest = false;
-    private Thread doElevator;
     private ElevatorButton[] elevatorButtons;
     private Door elevatorDoors;
     private Motor elevatorMotor;
@@ -40,11 +38,9 @@ public class Elevator implements Runnable{
      */
     public Elevator(int port){
         //TODO: Change constructor to use port for network handler instead of directly using scheduler
-//        this.schedulerSystem = s;
         this.currentFloor = 1;;
         elevatorDoors = new Door();
         elevatorMotor = new Motor();
-        this.port = port;
 
         elevatorButtons = new ElevatorButton[8];
         for(int i = 0; i < 8; i++){
@@ -52,16 +48,21 @@ public class Elevator implements Runnable{
             elevatorButtons[i] = newButton;
         }
 
-        // setup network handler
-//        port = nextPort++;
-        port = this.port + 1;
         try {
-            networkHandler = new Thread(new ElevatorNetworkHandler(this, port));
+            this.updateSocket = new DatagramSocket(port);
+            this.updateSocket.setSoTimeout(2000);  // Set time out to 2 seconds
+        } catch (SocketException se) {
+            se.printStackTrace();
+            System.exit(1);
+        }
+
+        // setup network handler --- use for receive request from the Scheduler
+        try {
+            networkHandler = new Thread(new ElevatorNetworkHandler(this, port + 1));
         } catch (IOException e){
             e.printStackTrace();
             System.exit(1);
         }
-        networkHandler.start();
         startUpdateTimer();
 
         try {
@@ -70,6 +71,7 @@ public class Elevator implements Runnable{
             e.printStackTrace();
             System.exit(1);
         }
+        networkHandler.start();
 
     }
 
@@ -82,7 +84,6 @@ public class Elevator implements Runnable{
                 System.err.println(e);
             }
         }
-
         nextFloor = event.getFloor();
         targetFloor = event.getCarButton();
         hasRequest = true;
@@ -144,9 +145,8 @@ public class Elevator implements Runnable{
      * Sends a message to the scheduler and receive acknowledge
      */
     public void sendAndReceive() throws IOException {
-        DatagramSocket socket = new DatagramSocket(port);
 
-        ElevatorInfo elevatorInfo = new ElevatorInfo(currentFloor);
+        ElevatorInfo elevatorInfo = new ElevatorInfo(this.currentFloor, this.hasRequest);
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         ObjectOutputStream output = new ObjectOutputStream(byteOut);
         output.writeObject(elevatorInfo);
@@ -163,20 +163,21 @@ public class Elevator implements Runnable{
         }
 
         // Perform sending and receiving with timeout handling
-        int attempt = 0;
+        int attempt = 1;
         boolean receivedResponse = false;
 
-        while (attempt < 3 && !receivedResponse) { // Retry up to 3 times
-            System.out.println(Thread.currentThread().getName() + ": Attempt " + (attempt + 1));
-            rpc_send(sendPacket, socket);
+        while (!receivedResponse) { // Keep sending until receive the acknowledgment
+            System.out.println(Thread.currentThread().getName() + ": Attempt " + (attempt) +
+                    " - Sending - " + elevatorInfo.toString());
+            rpc_send(sendPacket);
 
             try {
-                socket.receive(receivePacket);  // Attempt to receive the acknowledgment
+                this.updateSocket.receive(receivePacket);  // Attempt to receive the acknowledgment
                 this.handleAcknowledgment(receivePacket);  // Handle the acknowledgment
                 receivedResponse = true;
             } catch (SocketTimeoutException ste) {
                 // Handle timeout exception
-                System.out.println(Thread.currentThread().getName() + ": Timeout. Resending packet.");
+//                System.out.println(Thread.currentThread().getName() + ": Timeout. Resending - " + elevatorInfo.toString());
                 attempt++;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -185,12 +186,6 @@ public class Elevator implements Runnable{
                 throw new RuntimeException(e);
             }
         }
-
-        if (!receivedResponse) {
-            System.out.println(Thread.currentThread().getName() + ": No response after multiple attempts. Exiting.");
-            return;
-        }
-
     }
 
     /**
@@ -211,9 +206,9 @@ public class Elevator implements Runnable{
      *
      * @param request  the DatagramPacket representing the request.
      */
-    public void rpc_send(DatagramPacket request, DatagramSocket socket) {
+    public void rpc_send(DatagramPacket request) {
         try {
-            socket.send(request);
+            this.updateSocket.send(request);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -264,12 +259,6 @@ public class Elevator implements Runnable{
     }
 
     /**
-     * @return the elevator's network port
-     */
-    public int getPort(){
-        return port;
-    }
-    /**
      * Move the elevator up one floor
      */
     public void moveUp(){
@@ -289,40 +278,40 @@ public class Elevator implements Runnable{
         }
     }
 
-    /**
-     * Proccess request received from a given DatagramPacket
-     * @param requestPacket the DatagramPacket that was received. Should contain request data.
-     */
-    public void receiveRequest(DatagramPacket requestPacket){
-        // Process the received datagram.
-        System.out.println("ElevatorNetworkHandler: Received packet");
-        System.out.println("From host: " + requestPacket.getAddress());
-        System.out.println("Host port: " + requestPacket.getPort());
-        int len = requestPacket.getLength();
-        System.out.println("Length: " + len);
-        System.out.print("Containing: ");
+//    /**
+//     * Proccess request received from a given DatagramPacket
+//     * @param requestPacket the DatagramPacket that was received. Should contain request data.
+//     */
+//    public void receiveRequest(DatagramPacket requestPacket){
+//        // Process the received datagram.
+//        System.out.println("ElevatorNetworkHandler: Received packet");
+//        System.out.println("From host: " + requestPacket.getAddress());
+//        System.out.println("Host port: " + requestPacket.getPort());
+//        int len = requestPacket.getLength();
+//        System.out.println("Length: " + len);
+//        System.out.print("Containing: ");
+//
+//        System.out.println("received message string = " + new String(requestPacket.getData(), requestPacket.getOffset(), len));
+//        System.out.println("received message bytes = " + Arrays.toString(requestPacket.getData()));
+//
+//        try {
+//            Event event = getEventFromRequest(requestPacket);
+//            System.out.println("Elevator received request from Scheduler from Floor " + event.getFloor() + " to go " + event.getFloorButton() +
+//                    " to floor " + event.getCarButton() + ".");
+//        } catch (Exception e) {
+//
+//        }
+//    }
 
-        System.out.println("received message string = " + new String(requestPacket.getData(), requestPacket.getOffset(), len));
-        System.out.println("received message bytes = " + Arrays.toString(requestPacket.getData()));
+//    public Event getEventFromRequest (DatagramPacket requestPacket) throws IOException, ClassNotFoundException {
+//        ByteArrayInputStream bais = new ByteArrayInputStream(requestPacket.getData(), requestPacket.getOffset(), requestPacket.getLength());
+//        ObjectInputStream ois = new ObjectInputStream(bais);
+//        return (Event)ois.readObject();
+//    }
 
-        try {
-            Event event = getEventFromRequest(requestPacket);
-            System.out.println("Elevator received request from Scheduler from Floor " + event.getFloor() + " to go " + event.getFloorButton() +
-                    " to floor " + event.getCarButton() + ".");
-        } catch (Exception e) {
-
-        }
-    }
-
-    public Event getEventFromRequest (DatagramPacket requestPacket) throws IOException, ClassNotFoundException {
-        ByteArrayInputStream bais = new ByteArrayInputStream(requestPacket.getData(), requestPacket.getOffset(), requestPacket.getLength());
-        ObjectInputStream ois = new ObjectInputStream(bais);
-        return (Event)ois.readObject();
-    }
-
-    public Thread getNetworkHandler(){
-        return networkHandler;
-    }
+//    public Thread getNetworkHandler(){
+//        return networkHandler;
+//    }
 
     /**
      *Run the elevator thread
