@@ -16,8 +16,9 @@ public class Motor {
     }
 
     private MotorStates currMotorState;
+    private int movingTime;
 
-    public Motor(){ this.currMotorState = MotorStates.IDLE; }
+    public Motor(){ this.currMotorState = MotorStates.IDLE;}
 
     /**
      * Changes the state of the motor based on the movement of the Elevator.

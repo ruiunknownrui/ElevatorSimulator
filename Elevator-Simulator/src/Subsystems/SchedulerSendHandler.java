@@ -72,7 +72,7 @@ public class SchedulerSendHandler implements Runnable{
 
         while (!receivedResponse) { // Keep sending until receive the response
             System.out.println(Thread.currentThread().getName() + ": Attempt " + attempt + " - Sending " +
-                    sendEvent.toString());
+                    sendEvent.toString() + " target port: " + target);
             rpc_send(sendPacket);
 
             try {
@@ -102,7 +102,7 @@ public class SchedulerSendHandler implements Runnable{
         ByteArrayInputStream inputByte = new ByteArrayInputStream(receivePacket.getData());
         ObjectInputStream inputObject = new ObjectInputStream(inputByte);
         Ack receivedEvent = (Ack)inputObject.readObject();
-        System.out.println("Scheduler receive: " + receivedEvent.getAck());
+        System.out.println("Scheduler receive: " + receivedEvent.getAck() + " From: " + receivePacket.getPort());
     }
 
 

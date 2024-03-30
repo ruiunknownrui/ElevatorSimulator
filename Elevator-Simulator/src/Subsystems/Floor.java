@@ -3,6 +3,7 @@ package Subsystems;
 import Data.Ack;
 import Data.Direction;
 import Data.Event;
+import Data.FaultConstant;
 import States.SchedulerState;
 
 import java.io.*;
@@ -59,7 +60,18 @@ public class Floor implements Runnable{
                     return null;
                 }
 
-                Event e = new Event(eventData[0], Integer.parseInt(eventData[1]), d, Integer.parseInt(eventData[3]));
+                FaultConstant.Fault f;
+                if(eventData[4].equalsIgnoreCase("None")){
+                    f = FaultConstant.Fault.NONE;
+                } else if (eventData[4].equalsIgnoreCase("DoorStuck")){
+                    f = FaultConstant.Fault.DOOR_STUCK_OPEN;
+                } else if (eventData[4].equalsIgnoreCase("ElevatorStuck")){
+                    f = FaultConstant.Fault.ELEVATOR_STUCK;
+                } else {
+                    return null;
+                }
+
+                Event e = new Event(eventData[0], Integer.parseInt(eventData[1]), d, Integer.parseInt(eventData[3]), f);
                 eventsData.add(e);
             }
         } catch (FileNotFoundException e) {

@@ -3,13 +3,13 @@ package Subsystems;
 import Data.Ack;
 import Data.ElevatorInfo;
 import Data.Event;
+import Data.FaultConstant;
 import States.ElevatorButton;
 import States.Door;
 import States.Motor;
 
 import java.io.*;
 import java.net.*;
-import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -32,6 +32,14 @@ public class Elevator implements Runnable{
     private Motor elevatorMotor;
     private Timer updateTimer;
     private static final double UPDATE_RATE = (double) 1/30; // Amount of seconds in between each update
+    // to make calculation easy,
+    // assume the elevator needs 2 seconds to move up or down each floor.
+    // Assume the elevator needs 1 second to open or close the door.
+    private final int doorTime = 1;
+    private final int moveTime = 2;
+
+    private int currPort;
+    private FaultConstant.Fault inputFault;
 
     /**
      * Create an elevator that receive requests from the Scheduler
@@ -39,7 +47,7 @@ public class Elevator implements Runnable{
     public Elevator(int port){
         //TODO: Change constructor to use port for network handler instead of directly using scheduler
         this.currentFloor = 1;;
-        elevatorDoors = new Door();
+        elevatorDoors = new Door(this.doorTime);
         elevatorMotor = new Motor();
 
         elevatorButtons = new ElevatorButton[8];
@@ -48,6 +56,7 @@ public class Elevator implements Runnable{
             elevatorButtons[i] = newButton;
         }
 
+        this.currPort = port;
         try {
             this.updateSocket = new DatagramSocket(port);
             this.updateSocket.setSoTimeout(2000);  // Set time out to 2 seconds
@@ -87,6 +96,7 @@ public class Elevator implements Runnable{
         nextFloor = event.getFloor();
         targetFloor = event.getCarButton();
         hasRequest = true;
+        inputFault = event.getFault();
         notifyAll();
     }
 
@@ -98,9 +108,18 @@ public class Elevator implements Runnable{
                 System.err.println(e);
             }
         }
-
-        moveElevator(this.nextFloor);
-        moveElevator(this.targetFloor);
+        // If elevator door is opened before move
+        if (this.elevatorDoors.getCurrDoorState() == Door.DoorStates.DOORS_OPEN){
+            this.elevatorDoors.controlDoor();  // close door
+        }
+        moveElevator(this.nextFloor, false);  // Move elevator to the start position
+        if (this.elevatorDoors.getCurrDoorState() == Door.DoorStates.DOORS_CLOSED){  // open the door after arrive
+            this.elevatorDoors.controlDoor();  // open door
+        }
+        if (this.elevatorDoors.getCurrDoorState() == Door.DoorStates.DOORS_OPEN){  // close the door (assume passenger
+            this.elevatorDoors.controlDoor();  // close door
+        }
+        moveElevator(this.targetFloor, true);  // move to destination
         hasRequest = false;
         notifyAll();
     }
@@ -130,13 +149,29 @@ public class Elevator implements Runnable{
     }
 
 
-    public void moveElevator(int targetFloor) throws IOException {
+    public void moveElevator(int targetFloor, boolean isRequestDestination) throws IOException {
         while(targetFloor > currentFloor){
             currentFloor += 1;
+            try {
+                Thread.sleep(this.moveTime);
+            } catch (InterruptedException e) {
+                System.out.println(e);
+            }
+            if (isRequestDestination && targetFloor == currentFloor){
+                this.hasRequest = false;
+            }
             sendAndReceive();
         }
         while(targetFloor < currentFloor){
             currentFloor -= 1;
+            try {
+                Thread.sleep(this.moveTime);
+            } catch (InterruptedException e) {
+                System.out.println(e);
+            }
+            if (isRequestDestination && targetFloor == currentFloor){
+                this.hasRequest = false;
+            }
             sendAndReceive();
         }
     }
@@ -154,7 +189,6 @@ public class Elevator implements Runnable{
 
         try {
             this.sendPacket = new DatagramPacket(sendMsg, sendMsg.length, InetAddress.getLocalHost(), 3002);
-            // Initialize receivePacket before using it
             byte receiveData[] = new byte[1000];
             this.receivePacket = new DatagramPacket(receiveData, receiveData.length);
         } catch (UnknownHostException e) {
@@ -168,7 +202,7 @@ public class Elevator implements Runnable{
 
         while (!receivedResponse) { // Keep sending until receive the acknowledgment
             System.out.println(Thread.currentThread().getName() + ": Attempt " + (attempt) +
-                    " - Sending - " + elevatorInfo.toString());
+                    " - Sending - " + elevatorInfo.toString() + " From: " + this.currPort);
             rpc_send(sendPacket);
 
             try {
@@ -176,8 +210,6 @@ public class Elevator implements Runnable{
                 this.handleAcknowledgment(receivePacket);  // Handle the acknowledgment
                 receivedResponse = true;
             } catch (SocketTimeoutException ste) {
-                // Handle timeout exception
-//                System.out.println(Thread.currentThread().getName() + ": Timeout. Resending - " + elevatorInfo.toString());
                 attempt++;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -278,41 +310,6 @@ public class Elevator implements Runnable{
         }
     }
 
-//    /**
-//     * Proccess request received from a given DatagramPacket
-//     * @param requestPacket the DatagramPacket that was received. Should contain request data.
-//     */
-//    public void receiveRequest(DatagramPacket requestPacket){
-//        // Process the received datagram.
-//        System.out.println("ElevatorNetworkHandler: Received packet");
-//        System.out.println("From host: " + requestPacket.getAddress());
-//        System.out.println("Host port: " + requestPacket.getPort());
-//        int len = requestPacket.getLength();
-//        System.out.println("Length: " + len);
-//        System.out.print("Containing: ");
-//
-//        System.out.println("received message string = " + new String(requestPacket.getData(), requestPacket.getOffset(), len));
-//        System.out.println("received message bytes = " + Arrays.toString(requestPacket.getData()));
-//
-//        try {
-//            Event event = getEventFromRequest(requestPacket);
-//            System.out.println("Elevator received request from Scheduler from Floor " + event.getFloor() + " to go " + event.getFloorButton() +
-//                    " to floor " + event.getCarButton() + ".");
-//        } catch (Exception e) {
-//
-//        }
-//    }
-
-//    public Event getEventFromRequest (DatagramPacket requestPacket) throws IOException, ClassNotFoundException {
-//        ByteArrayInputStream bais = new ByteArrayInputStream(requestPacket.getData(), requestPacket.getOffset(), requestPacket.getLength());
-//        ObjectInputStream ois = new ObjectInputStream(bais);
-//        return (Event)ois.readObject();
-//    }
-
-//    public Thread getNetworkHandler(){
-//        return networkHandler;
-//    }
-
     /**
      *Run the elevator thread
      */
@@ -336,8 +333,10 @@ public class Elevator implements Runnable{
     }
 
     public static void main(String[] args) {
-        Thread elevator;
-        elevator = new Thread(new  Elevator(3500));
-        elevator.start();
+        Thread elevator1, elevator2;
+        elevator1 = new Thread(new  Elevator(3500));
+        elevator1.start();
+        elevator2 = new Thread(new  Elevator(3510));
+        elevator2.start();
     }
 }

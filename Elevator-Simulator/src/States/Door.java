@@ -16,8 +16,9 @@ public class Door {
     }
 
     private DoorStates currDoorState;
+    private int doingTime;
 
-    public Door(){ this.currDoorState = DoorStates.DOORS_CLOSED; }
+    public Door(int doingTime){ this.currDoorState = DoorStates.DOORS_OPEN; this.doingTime = doingTime;}
 
     /**
      * Function to change state of doors according to state machine
@@ -48,4 +49,22 @@ public class Door {
      * @return Current Door state
      */
     public DoorStates getCurrDoorState(){ return this.currDoorState; }
+
+    /**
+     * controlDoor opens or close door
+     */
+    public void controlDoor() {
+        if (this.currDoorState == DoorStates.DOORS_OPEN || this.currDoorState == DoorStates.DOORS_CLOSED) {
+            System.out.println("Door: " + this.currDoorState);
+            this.operateDoors();
+            System.out.println("Door: " + this.currDoorState);
+            try {
+                Thread.sleep(this.doingTime);
+            } catch (InterruptedException e) {
+                System.out.println(e);
+            }
+            this.operateDoors();
+            System.out.println("Door: " + this.currDoorState);
+        }
+    }
 }
