@@ -2,8 +2,6 @@ package Subsystems;
 
 import Data.Ack;
 import Data.ElevatorInfo;
-import Data.Event;
-import States.SchedulerState;
 
 import java.io.*;
 import java.net.DatagramPacket;
@@ -33,7 +31,7 @@ public class SchedulerUpdateHandler implements Runnable{
         this.scheduler = scheduler;
         try {
             this.socket = new DatagramSocket(this.port);  // Create Socket
-//            this.socket.setSoTimeout(); // Set time out to 3000 milliseconds
+//            this.socket.setSoTimeout(2000); // Set time out to 2 second
         } catch (SocketException se) {
             se.printStackTrace();
             System.exit(1);
@@ -51,27 +49,28 @@ public class SchedulerUpdateHandler implements Runnable{
 
         try {
             socket.receive(receivePacket);  // Attempt to receive the acknowledgment
-            sendAcknowledgment(receivePacket);  // Send back acknowledgement
+            ElevatorInfo receivedInfo = this.getReceived(receivePacket);
+            System.out.println("Scheduler receive: port-" + receivePacket.getPort() + ", elevator info-" + receivedInfo.toString());
+            this.scheduler.updateElevatorInfo(receivePacket.getPort(), receivedInfo);
+            this.sendAcknowledgment(receivePacket, receivedInfo);  // Send back acknowledgement
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
-        this.updateInfo(receivePacket);
 
     }
 
     /**
-     * updateInfo calls function in scheduler to update the specific elevator's information
+     * getReceived returns the received information in ElevatorInfo format
      * @param receivePacket  the received DatagramPacket
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    public void updateInfo(DatagramPacket receivePacket) throws IOException, ClassNotFoundException {
+    public ElevatorInfo getReceived(DatagramPacket receivePacket) throws IOException, ClassNotFoundException {
         ByteArrayInputStream inputByte = new ByteArrayInputStream(receivePacket.getData());
         ObjectInputStream inputObject = new ObjectInputStream(inputByte);
         ElevatorInfo receivedInfo = (ElevatorInfo)inputObject.readObject();
-        System.out.println("Scheduler receive: port-" + receivePacket.getPort() + ", floor-" + receivedInfo.getCurrFloor());
-        this.scheduler.updateElevatorInfo(receivePacket.getPort(), receivedInfo);
+        return receivedInfo;
     }
 
     /**
@@ -79,8 +78,8 @@ public class SchedulerUpdateHandler implements Runnable{
      * @param receivedPacket  the received DatagramPacket
      * @throws IOException
      */
-    public void sendAcknowledgment(DatagramPacket receivedPacket) throws IOException {
-        Ack newAck = new Ack("Receive updated info from Elevator");
+    public void sendAcknowledgment(DatagramPacket receivedPacket, ElevatorInfo elevatorInfo) throws IOException {
+        Ack newAck = new Ack("Receive updated info from Elevator: " + elevatorInfo.toString());
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         ObjectOutputStream output = new ObjectOutputStream(byteOut);
         output.writeObject(newAck);

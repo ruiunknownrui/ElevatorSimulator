@@ -34,7 +34,7 @@ public class SchedulerReceiveHandler implements Runnable{
         this.scheduler = scheduler;
         try {
             this.socket = new DatagramSocket(this.port);  // Create Socket
-//            this.socket.setSoTimeout(); // Set time out to 3000 milliseconds
+//            this.socket.setSoTimeout(2000); // Set time out to 2 second
         } catch (SocketException se) {
             se.printStackTrace();
             System.exit(1);
@@ -52,8 +52,11 @@ public class SchedulerReceiveHandler implements Runnable{
 
         try {
             socket.receive(receivePacket);  // Attempt to receive the acknowledgment
-            sendAcknowledgment(receivePacket);  // Send back acknowledgement
-            this.addEventToBuffer(receivePacket);
+            Event received = this.getReceivedEvent(receivePacket);
+            System.out.println("Scheduler receive " + received.toString());
+            sendAcknowledgment(receivePacket, received);  // Send back acknowledgement
+            this.buffer.addToEvents(received);  // Add received event to buffer
+            this.scheduler.setState(SchedulerState.updateState(true, false));
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -61,18 +64,16 @@ public class SchedulerReceiveHandler implements Runnable{
     }
 
     /**
-     * addEventToBuffer adds the received event to the request buffer
+     * getReceiveEvent return the receive information in Event format
      * @param receivePacket  the received DatagramPacket
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    public void addEventToBuffer(DatagramPacket receivePacket) throws IOException, ClassNotFoundException {
+    public Event getReceivedEvent(DatagramPacket receivePacket) throws IOException, ClassNotFoundException {
       ByteArrayInputStream inputByte = new ByteArrayInputStream(receivePacket.getData());
       ObjectInputStream inputObject = new ObjectInputStream(inputByte);
       Event receivedEvent = (Event) inputObject.readObject();
-      System.out.println("Scheduler receive " + receivedEvent.toString());
-      this.buffer.addToEvents(receivedEvent);
-      this.scheduler.setState(SchedulerState.updateState(true, false));
+      return receivedEvent;
     }
 
     /**
@@ -80,8 +81,8 @@ public class SchedulerReceiveHandler implements Runnable{
      * @param receivedPacket  the received DatagramPacket
      * @throws IOException
      */
-    public void sendAcknowledgment(DatagramPacket receivedPacket) throws IOException {
-        Ack newAck = new Ack("Receive request from floor");
+    public void sendAcknowledgment(DatagramPacket receivedPacket, Event received) throws IOException {
+        Ack newAck = new Ack("Receive request from floor - " + received.toString());
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         ObjectOutputStream output = new ObjectOutputStream(byteOut);
         output.writeObject(newAck);
@@ -89,7 +90,7 @@ public class SchedulerReceiveHandler implements Runnable{
         ackPacket = new DatagramPacket(ackByte, ackByte.length, receivedPacket.getAddress(), receivedPacket.getPort());
         try{
             this.socket.send(ackPacket);
-            System.out.println("Send acknowledgment to floor!");
+            System.out.println("Send acknowledgment to floor! - " + received.toString());
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
