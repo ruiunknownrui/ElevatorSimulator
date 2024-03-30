@@ -24,8 +24,6 @@ public class ElevatorNetworkHandler implements Runnable{
         this.elevator = elevator;
         this.port = port;
         this.socket = new DatagramSocket(port);
-//        this.socket.setSoTimeout(2000);  // Set timeout to 2 second
-//        System.out.println("port in network: " + port);
     }
 
     /**

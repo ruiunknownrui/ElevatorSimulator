@@ -34,7 +34,6 @@ public class SchedulerReceiveHandler implements Runnable{
         this.scheduler = scheduler;
         try {
             this.socket = new DatagramSocket(this.port);  // Create Socket
-//            this.socket.setSoTimeout(2000); // Set time out to 2 second
         } catch (SocketException se) {
             se.printStackTrace();
             System.exit(1);

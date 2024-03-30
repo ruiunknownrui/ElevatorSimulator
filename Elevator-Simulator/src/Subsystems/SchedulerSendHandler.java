@@ -67,7 +67,7 @@ public class SchedulerSendHandler implements Runnable{
         }
 
         // Perform sending and receiving with timeout handling
-        int attempt = 0;
+        int attempt = 1;
         boolean receivedResponse = false;
 
         while (!receivedResponse) { // Keep sending until receive the response
