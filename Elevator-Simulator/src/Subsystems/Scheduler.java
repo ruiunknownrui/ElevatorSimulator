@@ -67,7 +67,7 @@ public class Scheduler implements Runnable{
         int startFloor = event.getFloor();
         int elevatorKey = -1;
         int closestFloor = -10;
-        while (accessInfo || elevatorInfo.isEmpty()){
+        while (accessInfo || elevatorInfo.isEmpty() || !this.hasFreeElevator()){
             try{
                 wait();
             } catch (InterruptedException e){
@@ -77,16 +77,30 @@ public class Scheduler implements Runnable{
         accessInfo = true;
         // keep finding the elevator which is closest to the start floor
         for (var elevator : elevatorInfo.entrySet()){
-            if (closestFloor == -10 ||
+            if ((!elevator.getValue().isDoingRequest() && !elevator.getValue().isShutDown())
+                    && (closestFloor == -10 ||
                     (Math.abs(startFloor - closestFloor) >
-                            Math.abs(startFloor - elevator.getValue().getCurrFloor()))){
+                            Math.abs(startFloor - elevator.getValue().getCurrFloor())))){
                 elevatorKey = elevator.getKey();
                 closestFloor = elevator.getValue().getCurrFloor();
                 }
-            }
+        }
         notifyAll();
         accessInfo = false;
         return elevatorKey;
+    }
+
+    /**
+     * hasFreeElevator returns if at least one elevator has no request
+     * @return
+     */
+    public boolean hasFreeElevator(){
+        for (var elevator : elevatorInfo.entrySet()){
+            if(!elevator.getValue().isDoingRequest() && !elevator.getValue().isShutDown()){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

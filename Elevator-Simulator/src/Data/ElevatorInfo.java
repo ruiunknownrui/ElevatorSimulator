@@ -8,14 +8,16 @@ import java.io.Serializable;
 public class ElevatorInfo implements Serializable {
     private int currFloor;  // Current floor
     private boolean doingRequest;  // If the elevator doing request
+    private boolean isShutDown;
 
     /**
      * initialize the current floor of the object
      * @param currFloor  current floor
      */
-    public ElevatorInfo(int currFloor, boolean doingRequest){
+    public ElevatorInfo(int currFloor, boolean doingRequest, boolean isShutDown){
         this.currFloor = currFloor;
         this.doingRequest = doingRequest;
+        this.isShutDown = isShutDown;
     }
 
     /**
@@ -24,6 +26,22 @@ public class ElevatorInfo implements Serializable {
      */
     public int getCurrFloor() {
         return currFloor;
+    }
+
+    /**
+     * isDoingRequest returns if the elevator is doing request
+     * @return
+     */
+    public boolean isDoingRequest(){
+        return doingRequest;
+    }
+
+    /**
+     * isShutDown returns if the elevator has shut down
+     * @return
+     */
+    public boolean isShutDown(){
+        return isShutDown;
     }
 
     /**

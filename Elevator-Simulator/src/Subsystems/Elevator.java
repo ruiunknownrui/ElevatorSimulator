@@ -40,6 +40,7 @@ public class Elevator implements Runnable{
 
     private int currPort;
     private FaultConstant.Fault inputFault;
+    private boolean elevatorShutDown = false;
 
     /**
      * Create an elevator that receive requests from the Scheduler
@@ -110,14 +111,35 @@ public class Elevator implements Runnable{
         }
         // If elevator door is opened before move
         if (this.elevatorDoors.getCurrDoorState() == Door.DoorStates.DOORS_OPEN){
-            this.elevatorDoors.controlDoor();  // close door
+            this.elevatorDoors.controlDoor(this.currPort, false);  // close door
         }
         moveElevator(this.nextFloor, false);  // Move elevator to the start position
+        // If input fault is elevator fault, assume is stuck before reach to passengers
+        if (inputFault == FaultConstant.Fault.ELEVATOR_STUCK){
+            System.out.println("!!!!! " + currPort + " Elevator Stuck !!!!!");
+            this.elevatorShutDown = true;  // shut down the elevator
+            System.out.println("!!!!!!!!!! " + currPort + " Fix Elevator Stuck - Elevator Shut Down: " +
+                    this.elevatorShutDown + "!!!!!!!!!!");
+            hasRequest = false;
+            notifyAll();
+            return;
+        }
         if (this.elevatorDoors.getCurrDoorState() == Door.DoorStates.DOORS_CLOSED){  // open the door after arrive
-            this.elevatorDoors.controlDoor();  // open door
+            this.elevatorDoors.controlDoor(this.currPort, false);  // open door
         }
         if (this.elevatorDoors.getCurrDoorState() == Door.DoorStates.DOORS_OPEN){  // close the door (assume passenger
-            this.elevatorDoors.controlDoor();  // close door
+            boolean detectFault;
+            if (this.inputFault == FaultConstant.Fault.DOOR_STUCK_OPEN) {
+                detectFault = true;
+            }else {
+                detectFault = false;
+            }
+            this.elevatorDoors.controlDoor(this.currPort, detectFault);  // close door
+            if (detectFault){  // if has door fault, fix the door fault
+                this.elevatorDoors.operateDoors();
+                System.out.println("!!!!!!!!!! " + currPort + " Door stuck fix - Current Door State: " +
+                        this.elevatorDoors.getCurrDoorState() + " !!!!!!!!!!");
+            }
         }
         moveElevator(this.targetFloor, true);  // move to destination
         hasRequest = false;
@@ -181,7 +203,7 @@ public class Elevator implements Runnable{
      */
     public void sendAndReceive() throws IOException {
 
-        ElevatorInfo elevatorInfo = new ElevatorInfo(this.currentFloor, this.hasRequest);
+        ElevatorInfo elevatorInfo = new ElevatorInfo(this.currentFloor, this.hasRequest, this.elevatorShutDown);
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         ObjectOutputStream output = new ObjectOutputStream(byteOut);
         output.writeObject(elevatorInfo);

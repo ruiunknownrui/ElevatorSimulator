@@ -52,19 +52,25 @@ public class Door {
 
     /**
      * controlDoor opens or close door
+     * @param elevatorPort  the port of the corresponding elevator
+     * @param hasFault  if fault happens during opening/closing
      */
-    public void controlDoor() {
+    public void controlDoor(int elevatorPort, boolean hasFault) {
         if (this.currDoorState == DoorStates.DOORS_OPEN || this.currDoorState == DoorStates.DOORS_CLOSED) {
-            System.out.println("Door: " + this.currDoorState);
+            System.out.println(elevatorPort + " Door: " + this.currDoorState);
             this.operateDoors();
-            System.out.println("Door: " + this.currDoorState);
+            System.out.println(elevatorPort + " Door: " + this.currDoorState);
+            if (hasFault){  // If has fault, return without the next operation
+                System.out.println("!!!!! " +  elevatorPort + " Door stuck: " + this.currDoorState + "!!!!!");
+                return;
+            }
             try {
                 Thread.sleep(this.doingTime);
             } catch (InterruptedException e) {
                 System.out.println(e);
             }
             this.operateDoors();
-            System.out.println("Door: " + this.currDoorState);
+            System.out.println(elevatorPort + " Door: " + this.currDoorState);
         }
     }
 }
