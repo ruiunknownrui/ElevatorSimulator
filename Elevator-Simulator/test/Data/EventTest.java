@@ -26,7 +26,7 @@ public class EventTest {
 
     @Test
     void serialize() throws IOException, ClassNotFoundException {
-        Event testEvent = new Event("14:05:15.0", 2 ,Direction.Up, 4);
+        Event testEvent = new Event("14:05:15.0", 2 ,Direction.Up, 4, FaultConstant.Fault.NONE);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream(6400);
         ObjectOutputStream oos = new ObjectOutputStream(baos);

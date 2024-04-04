@@ -10,8 +10,8 @@ public class ElevatorTest {
 
     @BeforeEach
     void setUp() {
-        scheduler = new Scheduler(new RequestBuffer()); // Modify as needed based on actual constructors.
-        elevator = new Elevator(scheduler);
+        scheduler = new Scheduler(); // Modify as needed based on actual constructors.
+        elevator = new Elevator(4000);
     }
 
     @Test

@@ -7,16 +7,16 @@ public class Main {
     public static void main(String[] args) {
         Thread floor, elevator, schedulerThread;
 
-        RequestBuffer requestBuffer;
-        requestBuffer = new RequestBuffer();
+//        RequestBuffer requestBuffer;
+//        requestBuffer = new RequestBuffer();
 
-        Scheduler scheduler = new Scheduler(requestBuffer);
+        Scheduler scheduler = new Scheduler();
         schedulerThread = new Thread(scheduler);
-        floor = new Thread( new Floor(scheduler));
-        elevator = new Thread( new Elevator(scheduler));
+        floor = new Thread( new Floor());
+//        elevator = new Thread( new Elevator(scheduler));
 
         schedulerThread.start();
         floor.start();
-        elevator.start();
+//        elevator.start();
     }
 }

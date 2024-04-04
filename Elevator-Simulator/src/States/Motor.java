@@ -30,7 +30,8 @@ public class Motor {
     private double velocity = 0D;
     private double position = 0D;
     private int currFloor = MIN_FLOOR;
-
+    private int movingTime;
+    
     public Motor(Elevator elevator){
         this.elevator = elevator;
         this.currMotorState = MotorStates.IDLE;

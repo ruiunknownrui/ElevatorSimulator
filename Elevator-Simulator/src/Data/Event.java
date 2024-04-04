@@ -8,12 +8,14 @@ public class Event implements Serializable {
     private int floor;
     private Direction floorButton;
     private int carButton;
+    private FaultConstant.Fault fault;
 
-    public Event(String t, int f, Direction fB, int cB){
+    public Event(String t, int f, Direction fB, int cB, FaultConstant.Fault fault){
         this.time = t;
         this.floor = f;
         this.floorButton = fB;
         this.carButton = cB;
+        this.fault = fault;
     }
 
     public String getTime() {
@@ -30,6 +32,19 @@ public class Event implements Serializable {
 
     public int getCarButton() {
         return carButton;
+    }
+
+    public FaultConstant.Fault getFault(){
+        return this.fault;
+    }
+
+    /**
+     * toString returns the string format information of the object
+     * @return  the information of the object
+     */
+    public String toString(){
+        return "Time: " + time + ", Floor: " + floor + ", Floor Button: " + floorButton +
+                ", Car Button: " + carButton + ", Fault: " + fault;
     }
 }
 

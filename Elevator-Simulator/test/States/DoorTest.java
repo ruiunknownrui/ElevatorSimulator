@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class DoorTest {
 
-    private Door testDoors = new Door();
+    private Door testDoors = new Door(1);
 
     @Test
     void operateDoors() {

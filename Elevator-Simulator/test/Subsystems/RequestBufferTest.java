@@ -2,6 +2,7 @@ package Subsystems;
 
 import Data.Event;
 import Data.Direction;
+import Data.FaultConstant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,7 +14,7 @@ public class RequestBufferTest {
     @BeforeEach
     void setUp() {
         requestBuffer = new RequestBuffer();
-        testEvent = new Event("14:05:15.0", 2, Direction.Up, 3);
+        testEvent = new Event("14:05:15.0", 2, Direction.Up, 3, FaultConstant.Fault.NONE);
     }
 
     @Test
