@@ -1,5 +1,6 @@
 package Subsystems;
 
+import View.ElevatorView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,7 +12,8 @@ public class ElevatorTest {
     @BeforeEach
     void setUp() {
         scheduler = new Scheduler(); // Modify as needed based on actual constructors.
-        elevator = new Elevator(4000);
+        ElevatorView newView = new ElevatorView();
+        elevator = new Elevator(4000, newView);
     }
 
     @Test
