@@ -12,8 +12,8 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class MotorTest {
     private RequestBuffer testBuffer = new RequestBuffer();
-    private Scheduler testScheduler = new Scheduler(testBuffer);
-    private Elevator testElevator = new Elevator(testScheduler);
+    private Scheduler testScheduler = new Scheduler();
+    private Elevator testElevator = new Elevator(4000);
     private Motor testMotor = new Motor(testElevator);
 
     @Test
