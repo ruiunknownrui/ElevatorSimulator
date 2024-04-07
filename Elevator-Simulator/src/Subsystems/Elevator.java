@@ -22,9 +22,13 @@ public class Elevator implements Runnable{
     private Thread networkHandler;
     private DatagramSocket updateSocket;  // The socket only used to update the elevator arrival information
 
-    public void setCurrentFloor(int currentFloor) {
-        if (currentFloor < 0) throw new IllegalArgumentException("Floor number invalid!");
-        this.currentFloor = currentFloor;
+    public void setCurrentFloor(int newFloor) {
+        if (newFloor <= 0 || newFloor > arrivalSensors.length) throw new IllegalArgumentException("Floor number invalid!");
+        // resets arrival sensor for current floor
+        if (newFloor != currentFloor){
+            arrivalSensors[currentFloor - 1].resetSensor();
+            this.currentFloor = newFloor;
+        }
     }
 
     private int currentFloor;
@@ -34,6 +38,7 @@ public class Elevator implements Runnable{
     private DatagramPacket receivePacket;
     private boolean hasRequest = false;
     private ElevatorButton[] elevatorButtons;
+    private ArrivalSensor[] arrivalSensors;
     private Door elevatorDoors;
     private Motor elevatorMotor;
     private Timer updateTimer;
@@ -58,9 +63,11 @@ public class Elevator implements Runnable{
         elevatorMotor = new Motor();
 
         elevatorButtons = new ElevatorButton[8];
+        arrivalSensors = new ArrivalSensor[8];
         for(int i = 0; i < 8; i++){
             ElevatorButton newButton = new ElevatorButton(i+1);
             elevatorButtons[i] = newButton;
+            arrivalSensors[i] = new ArrivalSensor(this, i + 1);
         }
 
         this.currPort = port;
@@ -309,6 +316,9 @@ public class Elevator implements Runnable{
         // use deltaT for calculating how far the elevator should move etc
 //        System.out.println("Elevator update! Last update was " + deltaT + " seconds ago");
 
+        for (int i = 0; i < arrivalSensors.length; i++) {
+            arrivalSensors[i].checkSensor();
+        }
     }
 
     /**

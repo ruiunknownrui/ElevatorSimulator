@@ -1,8 +1,8 @@
 package Subsystems;
 
 public class ArrivalSensor {
-    private Elevator elevator;
-    private int floorNum;
+    private final Elevator elevator;
+    private final int floorNum;
     private boolean triggered;
 
     ArrivalSensor(Elevator e, int floor){
@@ -17,16 +17,18 @@ public class ArrivalSensor {
 
     private void triggerSensor(){
         // TODO: Call function in elevator to notify of floor change, just setting floor number for now
-        elevator.setCurrentFloor(floorNum);
-        triggered = true;
+        if (!triggered){
+            elevator.setCurrentFloor(floorNum);
+            triggered = true;
+        }
     }
 
     public void resetSensor(){
         triggered = false;
     }
 
-    private void checkSensor(){
-        // TODO: Change check criteria to use direct elevator position maybe
+    public void checkSensor(){
+        // TODO: Change check criteria, use direct elevator position if implemented
         if (elevator.getCurrentFloor() == floorNum){
             triggerSensor();
         }
