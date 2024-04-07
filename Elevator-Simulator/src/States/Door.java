@@ -18,7 +18,7 @@ public class Door {
     private DoorStates currDoorState;
     private int doingTime;
 
-    public Door(int doingTime){ this.currDoorState = DoorStates.DOORS_OPEN; this.doingTime = doingTime;}
+    public Door(int doingTime){ this.currDoorState = DoorStates.DOORS_CLOSED; this.doingTime = doingTime;}
 
     /**
      * Function to change state of doors according to state machine
