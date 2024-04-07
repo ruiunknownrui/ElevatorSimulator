@@ -21,6 +21,12 @@ public class Elevator implements Runnable{
 
     private Thread networkHandler;
     private DatagramSocket updateSocket;  // The socket only used to update the elevator arrival information
+
+    public void setCurrentFloor(int currentFloor) {
+        if (currentFloor < 0) throw new IllegalArgumentException("Floor number invalid!");
+        this.currentFloor = currentFloor;
+    }
+
     private int currentFloor;
     private int targetFloor;  // destination of the request
     private int nextFloor;  // start floor of the request
