@@ -7,6 +7,8 @@ import Data.FaultConstant;
 import States.ElevatorButton;
 import States.Door;
 import States.Motor;
+import View.ElevatorView;
+import View.SystemView;
 
 import java.io.*;
 import java.net.*;
@@ -42,11 +44,15 @@ public class Elevator implements Runnable{
     private FaultConstant.Fault inputFault;
     private boolean elevatorShutDown = false;
 
+    private ElevatorView displayView;
+
     /**
      * Create an elevator that receive requests from the Scheduler
      */
-    public Elevator(int port){
+    public Elevator(int port, ElevatorView displayView){
         //TODO: Change constructor to use port for network handler instead of directly using scheduler
+        this.displayView = displayView;
+
         this.currentFloor = 1;;
         elevatorDoors = new Door(this.doorTime);
         elevatorMotor = new Motor();
@@ -116,10 +122,14 @@ public class Elevator implements Runnable{
         moveElevator(this.nextFloor, false);  // Move elevator to the start position
         // If input fault is elevator fault, assume is stuck before reach to passengers
         if (inputFault == FaultConstant.Fault.ELEVATOR_STUCK){
-            System.out.println("!!!!! " + currPort + " Elevator Stuck !!!!!");
+            String info1 = "!!!!! " + currPort + " Elevator Stuck !!!!!\n";
+            System.out.println(info1);
+            this.displayView.updateDescription(info1);
             this.elevatorShutDown = true;  // shut down the elevator
-            System.out.println("!!!!!!!!!! " + currPort + " Fix Elevator Stuck - Elevator Shut Down: " +
-                    this.elevatorShutDown + "!!!!!!!!!!");
+            String info2 = "!!!!!!!!!! " + currPort + " Fix Elevator Stuck - Elevator Shut Down: " +
+                    this.elevatorShutDown + "!!!!!!!!!!\n";
+            System.out.println(info2);
+            this.displayView.updateDescription(info2);
             hasRequest = false;
             notifyAll();
             return;
@@ -137,8 +147,10 @@ public class Elevator implements Runnable{
             this.elevatorDoors.controlDoor(this.currPort, detectFault);  // close door
             if (detectFault){  // if has door fault, fix the door fault
                 this.elevatorDoors.operateDoors();
-                System.out.println("!!!!!!!!!! " + currPort + " Door stuck fix - Current Door State: " +
-                        this.elevatorDoors.getCurrDoorState() + " !!!!!!!!!!");
+                String info3 = "!!!!!!!!!! " + currPort + " Door stuck fix - Current Door State: " +
+                        this.elevatorDoors.getCurrDoorState() + " !!!!!!!!!!\n";
+                System.out.println(info3);
+                this.displayView.updateDescription(info3);
             }
         }
         moveElevator(this.targetFloor, true);  // move to destination
@@ -174,6 +186,7 @@ public class Elevator implements Runnable{
     public void moveElevator(int targetFloor, boolean isRequestDestination) throws IOException {
         while(targetFloor > currentFloor){
             currentFloor += 1;
+            this.displayView.updateDescription("Current Floor: " + currentFloor + "\n");
             try {
                 Thread.sleep(this.moveTime);
             } catch (InterruptedException e) {
@@ -186,6 +199,7 @@ public class Elevator implements Runnable{
         }
         while(targetFloor < currentFloor){
             currentFloor -= 1;
+            this.displayView.updateDescription("Current Floor: " + currentFloor + "\n");
             try {
                 Thread.sleep(this.moveTime);
             } catch (InterruptedException e) {
@@ -355,10 +369,28 @@ public class Elevator implements Runnable{
     }
 
     public static void main(String[] args) {
-        Thread elevator1, elevator2;
-        elevator1 = new Thread(new  Elevator(3500));
+        Thread elevator1, elevator2, elevator3, elevator4;
+        ElevatorView view1, view2, view3, view4;
+        SystemView view = new SystemView();
+
+        view1 = view.getElevatorView(0);
+        view1.setElevatorName("Elevator 1");
+        elevator1 = new Thread(new  Elevator(3500, view1));
         elevator1.start();
-        elevator2 = new Thread(new  Elevator(3510));
+
+        view2 = view.getElevatorView(1);
+        view2.setElevatorName("Elevator 2");
+        elevator2 = new Thread(new  Elevator(3510, view2));
         elevator2.start();
+
+        view3 = view.getElevatorView(2);
+        view3.setElevatorName("Elevator 3");
+        elevator3 = new Thread(new  Elevator(3520, view3));
+        elevator3.start();
+
+        view4 = view.getElevatorView(3);
+        view4.setElevatorName("Elevator 4");
+        elevator4 = new Thread(new  Elevator(3530, view4));
+        elevator4.start();
     }
 }
