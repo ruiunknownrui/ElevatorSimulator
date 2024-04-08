@@ -133,7 +133,7 @@ public class Elevator implements Runnable{
 
         this.sendAndReceive();  // Tell scheduler this elevator has request
 
-        this.displayView.updateDescription("");
+        this.displayView.updateDescription("\n Received Request - " + this.getCurTime());
 
         // If the current floor is the one the elevator needs to take the passenger
         if (this.nextFloor != this.currentFloor){
