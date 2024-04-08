@@ -2,20 +2,16 @@ SYSC 3303 Lab Group 4 - Iteration
 
 Contributors:
   Ahmed Moazzam
-  -
+  - update UML
+  - update Unit test
 
   Adam Arrhaoui
-  -
+  - help with elevator movement
 
   Rebecca Li
-  - Fix problem in previous iteration
-  - Create FaultConstant, AckTest, ElevatorInfoTest class
-  - Update ElevatorInfo, Event, Door, Elevator, ElevatorNewWorkHandler, Floor,
-  - - Scheduler, SchedulerReceiveHandler, SchedulerSendHandler, SchedulerUpdateHandler classes
-  - Update some test classes
-  - Update input file (add Faults)
-  - Timing diagram
-  - Updated README
+  - Update elevator moving, boarding, operating doors function.
+  - Creates GUI
+  - Update README
 
   Xianqi Wang
   -
@@ -47,6 +43,10 @@ Files:
   - SchedulerSendHandler.java, class for Scheduler to send request to elevators
   - SchedulerUpdateHandler.java, class for Scheduler to received the elevator's updated location.
   - RequestBuffer.java, class for thread-safe buffer used by Scheduler
+
+  src/View:
+  - ElevatorView.java, class for GUI of each elevator
+  - System.java, class for GUI of entire elevator system
 
 
   test/:
