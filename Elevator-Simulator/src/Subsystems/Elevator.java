@@ -12,6 +12,7 @@ import View.SystemView;
 
 import java.io.*;
 import java.net.*;
+import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -115,6 +116,12 @@ public class Elevator implements Runnable{
         notifyAll();
     }
 
+    public String getCurTime(){
+        Calendar currentTime = Calendar.getInstance();
+        return currentTime.get(Calendar.HOUR) + ":" +
+                currentTime.get(Calendar.MINUTE) + ":" + currentTime.get(Calendar.SECOND);
+    }
+
     public synchronized void doRequest() throws IOException {
         while(!this.hasRequest && !this.elevatorShutDown && receiveNewRequest){
             try{
@@ -126,7 +133,7 @@ public class Elevator implements Runnable{
 
         this.sendAndReceive();  // Tell scheduler this elevator has request
 
-        this.displayView.updateDescription("Timer: " + this.curretnTime);
+        this.displayView.updateDescription("");
 
         // If the current floor is the one the elevator needs to take the passenger
         if (this.nextFloor != this.currentFloor){
@@ -161,8 +168,8 @@ public class Elevator implements Runnable{
         }
 
 //        hasRequest = false;
-        this.displayView.updateDescription("has request at the end of do request: " +  this.hasRequest);
-        this.displayView.updateDescription("receive request at the end of do request: " +  this.receiveNewRequest);
+//        this.displayView.updateDescription("has request at the end of do request: " +  this.hasRequest);
+//        this.displayView.updateDescription("receive request at the end of do request: " +  this.receiveNewRequest);
         notifyAll();
     }
 
@@ -173,10 +180,10 @@ public class Elevator implements Runnable{
     public void boardPassenger(boolean isMovingIn){
         if (isMovingIn){
             System.out.println(this.currPort + " Passenger is moving in.");
-            this.displayView.updateDescription("Passenger is moving in.");
+            this.displayView.updateDescription(this.getCurTime() + ": Passenger is moving in.");
         }else {
             System.out.println(this.currPort + " Passenger is moving out.");
-            this.displayView.updateDescription("Passenger is moving out.");
+            this.displayView.updateDescription(this.getCurTime() + ": Passenger is moving out.");
         }
         try {
             Thread.sleep(this.boardingTime);
@@ -185,10 +192,10 @@ public class Elevator implements Runnable{
         }
         if (isMovingIn){
             System.out.println(this.currPort + " Passenger moved in.");
-            this.displayView.updateDescription("Passenger moved in.");
+            this.displayView.updateDescription(this.getCurTime() + ": Passenger moved in.");
         }else {
             System.out.println(this.currPort + " Passenger moved out.");
-            this.displayView.updateDescription("Passenger moved out.");
+            this.displayView.updateDescription(this.getCurTime() + ": Passenger moved out.");
         }
     }
 
@@ -203,14 +210,14 @@ public class Elevator implements Runnable{
                 break;
             }
             this.displayView.updateFloor(this.previousFloor, this.currentFloor);
-            this.displayView.updateDescription("Current Floor: " + currentFloor);
+            this.displayView.updateDescription(this.getCurTime() + ": Current Floor: " + currentFloor);
             sendAndReceive();
         }
         while(targetFloor < currentFloor){
             this.previousFloor = this.currentFloor;
             this.currentFloor -= 1;
             this.elevatorMotor.elevatorMoving();
-            this.displayView.updateDescription("Current Floor: " + currentFloor);
+            this.displayView.updateDescription(this.getCurTime() + ": Current Floor: " + currentFloor);
             this.displayView.updateFloor(this.previousFloor, this.currentFloor);
             if (isRequestDestination && targetFloor == currentFloor  && !hasFault){
                 this.hasRequest = false;
@@ -222,11 +229,11 @@ public class Elevator implements Runnable{
 
         if (hasFault){
             System.out.println("!!!!! " + currPort + " Elevator Stuck !!!!!");
-            this.displayView.addFaultDescription("Elevator Stuck!!!");
+            this.displayView.addFaultDescription(this.getCurTime() + ": Elevator Stuck!!!");
             this.elevatorShutDown = true;  // shut down the elevator
             System.out.println( "!!!!!!!!!! " + currPort + " Fix Elevator Stuck - Elevator Shut Down: " +
                     this.elevatorShutDown + "!!!!!!!!!!");
-            this.displayView.updateDescription("Elevator Shut Down!");
+            this.displayView.updateDescription(this.getCurTime() + ": Elevator Shut Down!");
             this.displayView.displayFault(this.currentFloor, false);
             hasRequest = true;
         }
