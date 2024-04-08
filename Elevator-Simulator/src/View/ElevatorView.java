@@ -105,4 +105,29 @@ public class ElevatorView extends JPanel {
     public void updateDescription(String newDescription){
         this.description.append(newDescription);
     }
+
+    /**
+     * getElevatorName gets the label text for the elevator name.
+     * @return elevator name as text
+     */
+    public String getElevatorName() {
+        return nameLabel.getText();
+    }
+
+    /**
+     * getFloorPanelColor get the color of the panel at the specififed floor
+     * @param floorNum
+     * @return Color of panel
+     */
+    public Color getFloorPanelColor(int floorNum) {
+        return this.floors.get(floorNum - 1).getBackground();
+    }
+
+    /**
+     * getDescription gets the text in the description textarea
+     * @return text in description textarea
+     */
+    public String getDescription() {
+        return description.getText();
+    }
 }
