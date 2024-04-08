@@ -32,8 +32,8 @@ public class ElevatorView extends JPanel {
         // Creates and adds the description area to scrollPanel and show the scrollbar as needed.
         this.description = new JTextArea();
         this.description.setEditable(false);
-        JScrollPane scrollText = new JScrollPane(this.description);
-        scrollText.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        JScrollPane scrollPanel = new JScrollPane(this.description);
+        scrollPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
         // Creates the JPanel which contains 22 JPanels that represents the elevator at each floor.
         JPanel elevators = new JPanel();
@@ -52,7 +52,7 @@ public class ElevatorView extends JPanel {
         // Add name, floor view and description part to the panel
         this.add(this.nameLabel, BorderLayout.NORTH);
         this.add(elevators, BorderLayout.WEST);
-        this.add(this.description, BorderLayout.CENTER);
+        this.add(scrollPanel, BorderLayout.CENTER);
         this.setBorder(BorderFactory.createLineBorder(Color.black, 2));
     }
 
@@ -91,7 +91,7 @@ public class ElevatorView extends JPanel {
         if(curFloor > 0){  // Double check if the floor number is valid
             JPanel floorPanel = this.floors.get(curFloor - 1);
             if (isSolved) {
-                floorPanel.setBackground(NORMAL);
+                floorPanel.setBackground(CURRENT);
             }else {
                 floorPanel.setBackground(FAULT);
             }
@@ -99,11 +99,19 @@ public class ElevatorView extends JPanel {
     }
 
     /**
+     * addFaultDescription adds fault description to displayed text area
+     * @param des
+     */
+    public void addFaultDescription(String des){
+        this.description.append(des + "\n");
+    }
+
+    /**
      * updateDescription adds new description to the text displayed area
      * @param newDescription
      */
     public void updateDescription(String newDescription){
-        this.description.append(newDescription);
+        this.description.append(newDescription + "\n");
     }
 
     /**

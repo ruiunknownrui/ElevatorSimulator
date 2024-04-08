@@ -1,5 +1,6 @@
 package States;
 
+import View.ElevatorView;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -9,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class DoorTest {
 
-    private Door testDoors = new Door(1);
+    private Door testDoors = new Door(new ElevatorView());
 
     @Test
     void operateDoors() {
