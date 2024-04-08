@@ -131,6 +131,12 @@ public class SchedulerSendHandler implements Runnable{
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+
+            try {
+                Thread.sleep(1000);  // Wait 1 second before next send
+            }catch (InterruptedException e) {
+                System.out.println(e);
+            }
         }
     }
 }

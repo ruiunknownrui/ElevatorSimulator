@@ -3,6 +3,7 @@ package States;
 import Subsystems.Elevator;
 import Subsystems.RequestBuffer;
 import Subsystems.Scheduler;
+import View.ElevatorView;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MotorTest {
     private RequestBuffer testBuffer = new RequestBuffer();
     private Scheduler testScheduler = new Scheduler();
-    private Elevator testElevator = new Elevator(4000);
+    private Elevator testElevator = new Elevator(4000, new ElevatorView());
     private Motor testMotor = new Motor(testElevator);
 
     @Test
