@@ -38,8 +38,8 @@ public class ElevatorNetworkHandler implements Runnable{
         try {
             socket.receive(receivePacket);  // Attempt to receive the acknowledgment
             Event receivedEvent = this.getReceiveObject(receivePacket);
-            this.elevator.updateRequest(receivedEvent);  // update request
             this.sendAcknowledgment(receivePacket, receivedEvent);  // Send back acknowledgement
+            this.elevator.updateRequest(receivedEvent);  // update request
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);

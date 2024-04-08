@@ -20,13 +20,13 @@ public class MotorTest {
     @Test
     void moveElevator() {
         assertEquals(Motor.MotorStates.IDLE, testMotor.getCurrMotorState());
-        testMotor.moveElevator();
-        assertEquals(Motor.MotorStates.ACCELERATING, testMotor.getCurrMotorState());
-        testMotor.moveElevator();
-        assertEquals(Motor.MotorStates.MOVING_AT_MAX_VELOCITY, testMotor.getCurrMotorState());
-        testMotor.moveElevator();
-        assertEquals(Motor.MotorStates.DECELERATING, testMotor.getCurrMotorState());
-        testMotor.moveElevator();
+        testMotor.elevatorMoving();
+        assertEquals(Motor.MotorStates.MOVING, testMotor.getCurrMotorState());
+        testMotor.elevatorMoving();
         assertEquals(Motor.MotorStates.IDLE, testMotor.getCurrMotorState());
+//        testMotor.moveElevator();
+//        assertEquals(Motor.MotorStates.DECELERATING, testMotor.getCurrMotorState());
+//        testMotor.moveElevator();
+//        assertEquals(Motor.MotorStates.IDLE, testMotor.getCurrMotorState());
     }
 }

@@ -1,9 +1,6 @@
 package Subsystems;
 
-import Data.Ack;
-import Data.ElevatorInfo;
-import Data.Event;
-import Data.FaultConstant;
+import Data.*;
 import States.ElevatorButton;
 import States.Door;
 import States.Motor;
@@ -24,7 +21,7 @@ public class Elevator implements Runnable{
 
     private Thread networkHandler;
     private DatagramSocket updateSocket;  // The socket only used to update the elevator arrival information
-    private Event previousReceive = null;
+    private Event previousReceive = new Event("start", -1, Direction.Down, -5, FaultConstant.Fault.NONE);
     private int previousFloor = -1;
     private int currentFloor;
     private int targetFloor;  // destination of the request
@@ -105,13 +102,20 @@ public class Elevator implements Runnable{
                 System.err.println(e);
             }
         }
-        if (this.previousReceive == null || this.previousReceive != event) {
+        if (!this.previousReceive.toString().equals(event.toString())) {
+            System.out.println("previous event: " +this.previousReceive.toString());
+            System.out.println("new event: " + event.toString());
             this.previousReceive = event;
             nextFloor = event.getFloor();
             targetFloor = event.getCarButton();
             receiveNewRequest = true;
             hasRequest = true;
             inputFault = event.getFault();
+            try {
+                this.doRequest();
+            }catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
         notifyAll();
     }
@@ -379,19 +383,23 @@ public class Elevator implements Runnable{
      */
     public void run(){
         while (true){
-            if (receiveNewRequest && !elevatorShutDown){
-                receiveNewRequest = false;
-                try {
-                    doRequest();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            else {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException ignored) {
-                }
+//            if (receiveNewRequest && !elevatorShutDown){
+//                receiveNewRequest = false;
+//                try {
+//                    doRequest();
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//            else {
+//                try {
+//                    Thread.sleep(500);
+//                } catch (InterruptedException ignored) {
+//                }
+//            }
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ignored) {
             }
         }
 

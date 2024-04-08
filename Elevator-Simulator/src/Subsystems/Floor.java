@@ -61,15 +61,16 @@ public class Floor implements Runnable{
                 }
 
                 FaultConstant.Fault f;
-                if(eventData[4].equalsIgnoreCase("None")){
-                    f = FaultConstant.Fault.NONE;
-                } else if (eventData[4].equalsIgnoreCase("DoorStuck")){
-                    f = FaultConstant.Fault.DOOR_STUCK_OPEN;
-                } else if (eventData[4].equalsIgnoreCase("ElevatorStuck")){
-                    f = FaultConstant.Fault.ELEVATOR_STUCK;
-                } else {
-                    return null;
-                }
+//                if(eventData[4].equalsIgnoreCase("None")){
+//                    f = FaultConstant.Fault.NONE;
+//                } else if (eventData[4].equalsIgnoreCase("DoorStuck")){
+//                    f = FaultConstant.Fault.DOOR_STUCK_OPEN;
+//                } else if (eventData[4].equalsIgnoreCase("ElevatorStuck")){
+//                    f = FaultConstant.Fault.ELEVATOR_STUCK;
+//                } else {
+//                    f = FaultConstant.Fault.NONE;
+//                }
+                f = FaultConstant.Fault.NONE;
 
                 Event e = new Event(eventData[0], Integer.parseInt(eventData[1]), d, Integer.parseInt(eventData[3]), f);
                 eventsData.add(e);

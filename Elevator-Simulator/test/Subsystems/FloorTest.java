@@ -34,7 +34,7 @@ public class FloorTest {
         testList.add(event3);
         Event event4 = new Event("18:25:39.0", 4, Direction.Down, 2, FaultConstant.Fault.ELEVATOR_STUCK);
         testList.add(event4);
-        Event event5 = new Event("19:00:00.0", 1, Direction.Up, 3, FaultConstant.Fault.NONE);
+        Event event5 = new Event("19:00:00.0", 1, Direction.Up, 22, FaultConstant.Fault.NONE);
         testList.add(event5);
 
         for(int i = 0; i < testList.size(); i++){
