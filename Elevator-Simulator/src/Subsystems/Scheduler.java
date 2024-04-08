@@ -63,7 +63,6 @@ public class Scheduler implements Runnable{
      * @return
      */
     public synchronized int targetElevator(Event event){
-        //TODO: change the logic
         int startFloor = event.getFloor();
         int elevatorKey = -1;
         int closestFloor = -10;
@@ -97,9 +96,12 @@ public class Scheduler implements Runnable{
     public boolean hasFreeElevator(){
         for (var elevator : elevatorInfo.entrySet()){
             if(!elevator.getValue().isDoingRequest() && !elevator.getValue().isShutDown()){
+                System.out.println("\nhave free elevator \n");
                 return true;
             }
         }
+
+        System.out.println("\nno free elevator \n");
         return false;
     }
 

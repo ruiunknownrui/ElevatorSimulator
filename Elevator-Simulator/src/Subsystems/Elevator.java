@@ -12,6 +12,7 @@ import View.SystemView;
 
 import java.io.*;
 import java.net.*;
+import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -23,28 +24,30 @@ public class Elevator implements Runnable{
 
     private Thread networkHandler;
     private DatagramSocket updateSocket;  // The socket only used to update the elevator arrival information
+    private Event previousReceive = null;
+    private int previousFloor = -1;
     private int currentFloor;
     private int targetFloor;  // destination of the request
     private int nextFloor;  // start floor of the request
     private DatagramPacket sendPacket;
     private DatagramPacket receivePacket;
     private boolean hasRequest = false;
+    private boolean receiveNewRequest = false;
     private ElevatorButton[] elevatorButtons;
     private Door elevatorDoors;
     private Motor elevatorMotor;
     private Timer updateTimer;
     private static final double UPDATE_RATE = (double) 1/30; // Amount of seconds in between each update
-    // to make calculation easy,
-    // assume the elevator needs 2 seconds to move up or down each floor.
-    // Assume the elevator needs 1 second to open or close the door.
-    private final int doorTime = 1;
-    private final int moveTime = 2;
 
     private int currPort;
     private FaultConstant.Fault inputFault;
     private boolean elevatorShutDown = false;
 
     private ElevatorView displayView;
+    // Assume only one person takes the elevator, the boarding/unboarding tims is 5 seconds -> 5000 milliseconds
+    private final int boardingTime = 5000;
+
+    private double curretnTime = 0.0;
 
     /**
      * Create an elevator that receive requests from the Scheduler
@@ -53,9 +56,11 @@ public class Elevator implements Runnable{
         //TODO: Change constructor to use port for network handler instead of directly using scheduler
         this.displayView = displayView;
 
-        this.currentFloor = 1;;
-        elevatorDoors = new Door(this.doorTime);
-        elevatorMotor = new Motor();
+        this.currentFloor = 1;
+        this.displayView.updateDescription("Current Floor: " + this.currentFloor);
+        this.displayView.updateFloor(this.previousFloor, this.currentFloor);
+        elevatorDoors = new Door(displayView);
+        elevatorMotor = new Motor(this);
 
         elevatorButtons = new ElevatorButton[8];
         for(int i = 0; i < 8; i++){
@@ -100,115 +105,137 @@ public class Elevator implements Runnable{
                 System.err.println(e);
             }
         }
-        nextFloor = event.getFloor();
-        targetFloor = event.getCarButton();
-        hasRequest = true;
-        inputFault = event.getFault();
+        if (this.previousReceive == null || this.previousReceive != event) {
+            this.previousReceive = event;
+            nextFloor = event.getFloor();
+            targetFloor = event.getCarButton();
+            receiveNewRequest = true;
+            hasRequest = true;
+            inputFault = event.getFault();
+        }
         notifyAll();
     }
 
+    public String getCurTime(){
+        Calendar currentTime = Calendar.getInstance();
+        return currentTime.get(Calendar.HOUR) + ":" +
+                currentTime.get(Calendar.MINUTE) + ":" + currentTime.get(Calendar.SECOND);
+    }
+
     public synchronized void doRequest() throws IOException {
-        while(!hasRequest){
+        while(!this.hasRequest && !this.elevatorShutDown && receiveNewRequest){
             try{
                 wait();
             } catch (InterruptedException e){
                 System.err.println(e);
             }
         }
-        // If elevator door is opened before move
-        if (this.elevatorDoors.getCurrDoorState() == Door.DoorStates.DOORS_OPEN){
-            this.elevatorDoors.controlDoor(this.currPort, false);  // close door
-        }
-        moveElevator(this.nextFloor, false);  // Move elevator to the start position
-        // If input fault is elevator fault, assume is stuck before reach to passengers
-        if (inputFault == FaultConstant.Fault.ELEVATOR_STUCK){
-            String info1 = "!!!!! " + currPort + " Elevator Stuck !!!!!\n";
-            System.out.println(info1);
-            this.displayView.updateDescription(info1);
-            this.elevatorShutDown = true;  // shut down the elevator
-            String info2 = "!!!!!!!!!! " + currPort + " Fix Elevator Stuck - Elevator Shut Down: " +
-                    this.elevatorShutDown + "!!!!!!!!!!\n";
-            System.out.println(info2);
-            this.displayView.updateDescription(info2);
-            hasRequest = false;
-            notifyAll();
-            return;
-        }
-        if (this.elevatorDoors.getCurrDoorState() == Door.DoorStates.DOORS_CLOSED){  // open the door after arrive
-            this.elevatorDoors.controlDoor(this.currPort, false);  // open door
-        }
-        if (this.elevatorDoors.getCurrDoorState() == Door.DoorStates.DOORS_OPEN){  // close the door (assume passenger
-            boolean detectFault;
-            if (this.inputFault == FaultConstant.Fault.DOOR_STUCK_OPEN) {
-                detectFault = true;
+
+        this.sendAndReceive();  // Tell scheduler this elevator has request
+
+        this.displayView.updateDescription("");
+
+        // If the current floor is the one the elevator needs to take the passenger
+        if (this.nextFloor != this.currentFloor){
+            // This should always be true, just double check
+            if(this.elevatorDoors.getCurrDoorState() == Door.DoorStates.DOORS_OPEN){
+                this.elevatorDoors.controlDoor(this.currPort, false, this.currentFloor);  // close elevator doors
+                this.moveElevator(this.nextFloor, false, false);  // Move elevator to the start position
+                this.elevatorDoors.controlDoor(this.currPort, false, this.currentFloor);  // open elevator doors
             }else {
-                detectFault = false;
-            }
-            this.elevatorDoors.controlDoor(this.currPort, detectFault);  // close door
-            if (detectFault){  // if has door fault, fix the door fault
-                this.elevatorDoors.operateDoors();
-                String info3 = "!!!!!!!!!! " + currPort + " Door stuck fix - Current Door State: " +
-                        this.elevatorDoors.getCurrDoorState() + " !!!!!!!!!!\n";
-                System.out.println(info3);
-                this.displayView.updateDescription(info3);
+                System.out.println("DOOR STATE ARE INCORRECT!!!!!!!");
             }
         }
-        moveElevator(this.targetFloor, true);  // move to destination
-        hasRequest = false;
+        // This should always be true, just double check
+        if(this.elevatorDoors.getCurrDoorState() == Door.DoorStates.DOORS_OPEN){
+            this.boardPassenger(true);  // stimulates passenger moving into the elevator
+            boolean detectFault;
+            detectFault = this.inputFault == FaultConstant.Fault.DOOR_STUCK_OPEN;
+            this.elevatorDoors.controlDoor(this.currPort, detectFault, this.currentFloor);  // close door
+        }else {
+            System.out.println("DOOR STATE ARE INCORRECT!!!!!!!");
+        }
+        boolean hasElevatorFault = this.inputFault == FaultConstant.Fault.ELEVATOR_STUCK;
+        // move to destination
+        this.moveElevator(this.targetFloor, true, hasElevatorFault);
+
+        if (!hasElevatorFault) {
+            if (this.elevatorDoors.getCurrDoorState() == Door.DoorStates.DOORS_CLOSED) {  // open the door after arrive
+                this.elevatorDoors.controlDoor(this.currPort, false, this.currentFloor);  // open door
+            }
+
+            this.boardPassenger(false);  // stimulates passenger move out
+        }
+
+//        hasRequest = false;
+//        this.displayView.updateDescription("has request at the end of do request: " +  this.hasRequest);
+//        this.displayView.updateDescription("receive request at the end of do request: " +  this.receiveNewRequest);
         notifyAll();
     }
 
-    public boolean getHasRequest(){
-        return hasRequest;
+    /**
+     * boardPassenger stimulate that the elevator is boarding/unboarding the passenger
+     * @param isMovingIn  if the passenger is moving in the elevator or moving out
+     */
+    public void boardPassenger(boolean isMovingIn){
+        if (isMovingIn){
+            System.out.println(this.currPort + " Passenger is moving in.");
+            this.displayView.updateDescription(this.getCurTime() + ": Passenger is moving in.");
+        }else {
+            System.out.println(this.currPort + " Passenger is moving out.");
+            this.displayView.updateDescription(this.getCurTime() + ": Passenger is moving out.");
+        }
+        try {
+            Thread.sleep(this.boardingTime);
+        } catch (InterruptedException e) {
+            System.out.println(e);
+        }
+        if (isMovingIn){
+            System.out.println(this.currPort + " Passenger moved in.");
+            this.displayView.updateDescription(this.getCurTime() + ": Passenger moved in.");
+        }else {
+            System.out.println(this.currPort + " Passenger moved out.");
+            this.displayView.updateDescription(this.getCurTime() + ": Passenger moved out.");
+        }
     }
 
-    public void setHasRequest(boolean has){
-        hasRequest = has;
-    }
-
-    public int getNextFloor(){
-        return nextFloor;
-    }
-
-    public int getTargetFloor(){
-        return targetFloor;
-    }
-
-    public void increaseCurrentFloor(){
-        this.currentFloor += 1;
-    }
-
-    public void decreaseCurrentFloor(){
-        this.currentFloor -= 1;
-    }
-
-
-    public void moveElevator(int targetFloor, boolean isRequestDestination) throws IOException {
-        while(targetFloor > currentFloor){
-            currentFloor += 1;
-            this.displayView.updateDescription("Current Floor: " + currentFloor + "\n");
-            try {
-                Thread.sleep(this.moveTime);
-            } catch (InterruptedException e) {
-                System.out.println(e);
-            }
-            if (isRequestDestination && targetFloor == currentFloor){
+    public void moveElevator(int targetFloor, boolean isRequestDestination, boolean hasFault) throws IOException {
+        while(targetFloor > this.currentFloor){
+            this.previousFloor = this.currentFloor;
+            this.currentFloor += 1;
+            this.elevatorMotor.elevatorMoving();
+            if (isRequestDestination && targetFloor == currentFloor && !hasFault){
                 this.hasRequest = false;
+            } else if (hasFault) {
+                break;
             }
+            this.displayView.updateFloor(this.previousFloor, this.currentFloor);
+            this.displayView.updateDescription(this.getCurTime() + ": Current Floor: " + currentFloor);
             sendAndReceive();
         }
         while(targetFloor < currentFloor){
-            currentFloor -= 1;
-            this.displayView.updateDescription("Current Floor: " + currentFloor + "\n");
-            try {
-                Thread.sleep(this.moveTime);
-            } catch (InterruptedException e) {
-                System.out.println(e);
-            }
-            if (isRequestDestination && targetFloor == currentFloor){
+            this.previousFloor = this.currentFloor;
+            this.currentFloor -= 1;
+            this.elevatorMotor.elevatorMoving();
+            this.displayView.updateDescription(this.getCurTime() + ": Current Floor: " + currentFloor);
+            this.displayView.updateFloor(this.previousFloor, this.currentFloor);
+            if (isRequestDestination && targetFloor == currentFloor  && !hasFault){
                 this.hasRequest = false;
+            }else if (hasFault) {
+                break;
             }
             sendAndReceive();
+        }
+
+        if (hasFault){
+            System.out.println("!!!!! " + currPort + " Elevator Stuck !!!!!");
+            this.displayView.addFaultDescription(this.getCurTime() + ": Elevator Stuck!!!");
+            this.elevatorShutDown = true;  // shut down the elevator
+            System.out.println( "!!!!!!!!!! " + currPort + " Fix Elevator Stuck - Elevator Shut Down: " +
+                    this.elevatorShutDown + "!!!!!!!!!!");
+            this.displayView.updateDescription(this.getCurTime() + ": Elevator Shut Down!");
+            this.displayView.displayFault(this.currentFloor, false);
+            hasRequest = true;
         }
     }
 
@@ -316,6 +343,7 @@ public class Elevator implements Runnable{
         // can probably call update function to elevators subcomponents like motor/door/button etc.
         // use deltaT for calculating how far the elevator should move etc
 //        System.out.println("Elevator update! Last update was " + deltaT + " seconds ago");
+        this.curretnTime = deltaT;
 
     }
 
@@ -351,7 +379,8 @@ public class Elevator implements Runnable{
      */
     public void run(){
         while (true){
-            if (hasRequest){
+            if (receiveNewRequest && !elevatorShutDown){
+                receiveNewRequest = false;
                 try {
                     doRequest();
                 } catch (IOException e) {
