@@ -14,14 +14,14 @@ public class DoorTest {
 
     @Test
     void operateDoors() {
-        assertEquals(Door.DoorStates.DOORS_CLOSED, testDoors.getCurrDoorState());
-        testDoors.operateDoors();
-        assertEquals(Door.DoorStates.DOORS_OPENING, testDoors.getCurrDoorState());
-        testDoors.operateDoors();
         assertEquals(Door.DoorStates.DOORS_OPEN, testDoors.getCurrDoorState());
         testDoors.operateDoors();
         assertEquals(Door.DoorStates.DOORS_CLOSING, testDoors.getCurrDoorState());
         testDoors.operateDoors();
         assertEquals(Door.DoorStates.DOORS_CLOSED, testDoors.getCurrDoorState());
+        testDoors.operateDoors();
+        assertEquals(Door.DoorStates.DOORS_OPENING, testDoors.getCurrDoorState());
+        testDoors.operateDoors();
+        assertEquals(Door.DoorStates.DOORS_OPEN, testDoors.getCurrDoorState());
     }
 }
