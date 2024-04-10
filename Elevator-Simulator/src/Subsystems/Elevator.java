@@ -30,7 +30,7 @@ public class Elevator implements Runnable{
     private DatagramPacket receivePacket;
     private boolean hasRequest = false;
     private boolean receiveNewRequest = false;
-    private ElevatorButton[] elevatorButtons;
+//    private ElevatorButton[] elevatorButtons;
     private Door elevatorDoors;
     private Motor elevatorMotor;
     private Timer updateTimer;
@@ -59,11 +59,11 @@ public class Elevator implements Runnable{
         elevatorDoors = new Door(displayView);
         elevatorMotor = new Motor(this);
 
-        elevatorButtons = new ElevatorButton[8];
-        for(int i = 0; i < 8; i++){
-            ElevatorButton newButton = new ElevatorButton(i+1);
-            elevatorButtons[i] = newButton;
-        }
+//        elevatorButtons = new ElevatorButton[8];
+//        for(int i = 0; i < 8; i++){
+//            ElevatorButton newButton = new ElevatorButton(i+1);
+//            elevatorButtons[i] = newButton;
+//        }
 
         this.currPort = port;
         try {
@@ -89,11 +89,11 @@ public class Elevator implements Runnable{
             e.printStackTrace();
             System.exit(1);
         }
-        networkHandler.start();
-
+//        networkHandler.start();
     }
 
     //---------------------------------------------------------------------------------------
+
     public synchronized void updateRequest(Event event){
         while(hasRequest){
             try{
@@ -170,10 +170,6 @@ public class Elevator implements Runnable{
 
             this.boardPassenger(false);  // stimulates passenger move out
         }
-
-//        hasRequest = false;
-//        this.displayView.updateDescription("has request at the end of do request: " +  this.hasRequest);
-//        this.displayView.updateDescription("receive request at the end of do request: " +  this.receiveNewRequest);
         notifyAll();
     }
 
@@ -382,27 +378,7 @@ public class Elevator implements Runnable{
      *Run the elevator thread
      */
     public void run(){
-        while (true){
-//            if (receiveNewRequest && !elevatorShutDown){
-//                receiveNewRequest = false;
-//                try {
-//                    doRequest();
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
-//            else {
-//                try {
-//                    Thread.sleep(500);
-//                } catch (InterruptedException ignored) {
-//                }
-//            }
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException ignored) {
-            }
-        }
-
+        this.networkHandler.start();
     }
 
     public static void main(String[] args) {
