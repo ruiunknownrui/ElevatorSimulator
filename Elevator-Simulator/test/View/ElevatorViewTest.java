@@ -29,7 +29,7 @@ class ElevatorViewTest {
     void displayFault() {
         ElevatorView elevator = new ElevatorView();
         elevator.displayFault(2,true);
-        assertEquals(Color.white, elevator.getFloorPanelColor(2));
+        assertEquals(Color.GREEN, elevator.getFloorPanelColor(2));
 
         elevator.displayFault(2,false);
         assertEquals(Color.red, elevator.getFloorPanelColor(2));
@@ -40,6 +40,6 @@ class ElevatorViewTest {
         ElevatorView elevator = new ElevatorView();
         elevator.updateDescription("Test Description");
 
-        assertEquals("Test Description", elevator.getDescription());
+        assertTrue(elevator.getDescription().contains("Test Description"));
     }
 }

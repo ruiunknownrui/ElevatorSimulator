@@ -26,15 +26,15 @@ public class FloorTest {
         ArrayList<Event> realList = testFloor.readInput();
 
         ArrayList<Event> testList = new ArrayList<>();
-        Event event1 = new Event("14:05:15.0", 2, Direction.Up, 4, FaultConstant.Fault.NONE);
+        Event event1 = new Event("02:22:00:15", 2, Direction.Up, 18, FaultConstant.Fault.NONE);
         testList.add(event1);
-        Event event2 = new Event("14:35:12.0", 1, Direction.Up, 3, FaultConstant.Fault.NONE);
+        Event event2 = new Event("02:22:12:45", 1, Direction.Up, 19, FaultConstant.Fault.NONE);
         testList.add(event2);
-        Event event3 = new Event("14:46:10.0", 7, Direction.Down, 6, FaultConstant.Fault.DOOR_STUCK_OPEN);
+        Event event3 = new Event("02:22:25:30", 1, Direction.Up, 20, FaultConstant.Fault.DOOR_STUCK_OPEN);
         testList.add(event3);
-        Event event4 = new Event("18:25:39.0", 4, Direction.Down, 2, FaultConstant.Fault.ELEVATOR_STUCK);
+        Event event4 = new Event("02:22:38:00", 2, Direction.Down, 1, FaultConstant.Fault.ELEVATOR_STUCK);
         testList.add(event4);
-        Event event5 = new Event("19:00:00.0", 1, Direction.Up, 22, FaultConstant.Fault.NONE);
+        Event event5 = new Event("02:22:50:45", 3, Direction.Up, 7, FaultConstant.Fault.NONE);
         testList.add(event5);
 
         for(int i = 0; i < testList.size(); i++){
